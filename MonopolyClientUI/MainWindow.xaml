@@ -1,0 +1,60 @@
+﻿<Window x:Class="MonopolyClientUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Monopoly Client" Height="1200" Width="1200">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Connection & Join Game Section -->
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <!-- Board Display -->
+            <RowDefinition Height="Auto"/>
+            <!-- Messages Section -->
+            <RowDefinition Height="Auto"/>
+            <!-- Action Section -->
+        </Grid.RowDefinitions>
+
+        <!-- Connection Section -->
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
+            <Label Content="Server IP:" VerticalAlignment="Center"/>
+            <TextBox x:Name="IpAddressTextBox" Width="120" Margin="5,0"/>
+            <Label Content="Port:" VerticalAlignment="Center"/>
+            <TextBox x:Name="PortTextBox" Width="60" Margin="5,0" Text="5000"/>
+            <Button x:Name="ConnectButton" Content="Connect" Click="ConnectButton_Click" Margin="10,0"/>
+        </StackPanel>
+
+        <!-- Join Game Section -->
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,0,0,10">
+            <Label Content="Player Name:" VerticalAlignment="Center"/>
+            <TextBox x:Name="PlayerNameTextBox" Width="150" Margin="5,0"/>
+            <Button x:Name="JoinGameButton" Content="Join Game" Click="JoinGameButton_Click" Margin="10,0"/>
+        </StackPanel>
+
+        <!-- Board Display with Overlay -->
+        <Border Grid.Row="2" BorderBrush="Black" BorderThickness="1" Margin="0,0,0,10" Height="800" Width="800">
+            <!-- Use a Grid to layer the board image and the overlay Canvas -->
+            <Grid>
+                <!-- Board Image -->
+                <Image x:Name="BoardImage" Source="pack://application:,,,/Images/board.jpg" Stretch="Uniform" />
+
+                <!-- Overlay Canvas (transparent, on top of the board) -->
+                <Canvas x:Name="OverlayCanvas" Background="Transparent">
+                    <!-- Example Game Piece: a red circle -->
+                    <Ellipse x:Name="Player1Piece" Width="30" Height="30" Fill="Red"
+             Canvas.Left="50" Canvas.Top="50" />
+                </Canvas>
+
+            </Grid>
+        </Border>
+
+        <!-- Messages Display -->
+        <TextBox x:Name="MessagesTextBox" Grid.Row="3" Margin="0,0,0,10"
+                 IsReadOnly="True" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" Height="100" />
+
+        <!-- Action Section -->
+        <StackPanel Orientation="Horizontal" Grid.Row="4">
+            <Button x:Name="RollDiceButton" Content="Roll Dice" Click="RollDiceButton_Click" IsEnabled="False" Width="100"/>
+        </StackPanel>
+    </Grid>
+</Window>

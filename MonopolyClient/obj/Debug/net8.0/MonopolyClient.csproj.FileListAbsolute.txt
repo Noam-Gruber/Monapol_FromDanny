@@ -1,0 +1,28 @@
+C:\git\Noam\MonopolyClient\bin\Debug\net8.0\MonopolyClient.exe
+C:\git\Noam\MonopolyClient\bin\Debug\net8.0\MonopolyClient.deps.json
+C:\git\Noam\MonopolyClient\bin\Debug\net8.0\MonopolyClient.runtimeconfig.json
+C:\git\Noam\MonopolyClient\bin\Debug\net8.0\MonopolyClient.dll
+C:\git\Noam\MonopolyClient\bin\Debug\net8.0\MonopolyClient.pdb
+C:\git\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.GeneratedMSBuildEditorConfig.editorconfig
+C:\git\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.AssemblyInfoInputs.cache
+C:\git\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.AssemblyInfo.cs
+C:\git\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.csproj.CoreCompileInputs.cache
+C:\git\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.dll
+C:\git\Noam\MonopolyClient\obj\Debug\net8.0\refint\MonopolyClient.dll
+C:\git\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.pdb
+C:\git\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.genruntimeconfig.cache
+C:\git\Noam\MonopolyClient\obj\Debug\net8.0\ref\MonopolyClient.dll
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\bin\Debug\net8.0\MonopolyClient.exe
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\bin\Debug\net8.0\MonopolyClient.deps.json
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\bin\Debug\net8.0\MonopolyClient.runtimeconfig.json
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\bin\Debug\net8.0\MonopolyClient.dll
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\bin\Debug\net8.0\MonopolyClient.pdb
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.AssemblyInfoInputs.cache
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.AssemblyInfo.cs
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.csproj.CoreCompileInputs.cache
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.dll
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\obj\Debug\net8.0\refint\MonopolyClient.dll
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.pdb
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.genruntimeconfig.cache
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\obj\Debug\net8.0\ref\MonopolyClient.dll

@@ -1,0 +1,38 @@
+C:\git\Noam\MonopolyClientUI\bin\Debug\net8.0-windows\MonopolyClientUI.exe
+C:\git\Noam\MonopolyClientUI\bin\Debug\net8.0-windows\MonopolyClientUI.deps.json
+C:\git\Noam\MonopolyClientUI\bin\Debug\net8.0-windows\MonopolyClientUI.runtimeconfig.json
+C:\git\Noam\MonopolyClientUI\bin\Debug\net8.0-windows\MonopolyClientUI.dll
+C:\git\Noam\MonopolyClientUI\bin\Debug\net8.0-windows\MonopolyClientUI.pdb
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MainWindow.baml
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MainWindow.g.cs
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\App.g.cs
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI_MarkupCompile.cache
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.g.resources
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.GeneratedMSBuildEditorConfig.editorconfig
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.AssemblyInfoInputs.cache
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.AssemblyInfo.cs
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.csproj.CoreCompileInputs.cache
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.dll
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\refint\MonopolyClientUI.dll
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.pdb
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.genruntimeconfig.cache
+C:\git\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\ref\MonopolyClientUI.dll
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\bin\Debug\net8.0-windows\MonopolyClientUI.exe
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\bin\Debug\net8.0-windows\MonopolyClientUI.deps.json
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\bin\Debug\net8.0-windows\MonopolyClientUI.runtimeconfig.json
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\bin\Debug\net8.0-windows\MonopolyClientUI.dll
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\bin\Debug\net8.0-windows\MonopolyClientUI.pdb
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MainWindow.baml
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MainWindow.g.cs
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\App.g.cs
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI_MarkupCompile.cache
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.g.resources
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.AssemblyInfoInputs.cache
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.AssemblyInfo.cs
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.csproj.CoreCompileInputs.cache
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.dll
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\refint\MonopolyClientUI.dll
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.pdb
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\MonopolyClientUI.genruntimeconfig.cache
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClientUI\obj\Debug\net8.0-windows\ref\MonopolyClientUI.dll

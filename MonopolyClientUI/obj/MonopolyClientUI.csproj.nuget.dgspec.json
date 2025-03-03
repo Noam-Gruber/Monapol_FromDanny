@@ -1,0 +1,85 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\NOAMGR\\OneDrive - Rafael\\Documents\\Monapol_Danny\\Noam\\MonopolyClientUI\\MonopolyClientUI.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\NOAMGR\\OneDrive - Rafael\\Documents\\Monapol_Danny\\Noam\\MonopolyClientUI\\MonopolyClientUI.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\NOAMGR\\OneDrive - Rafael\\Documents\\Monapol_Danny\\Noam\\MonopolyClientUI\\MonopolyClientUI.csproj",
+        "projectName": "MonopolyClientUI",
+        "projectPath": "C:\\Users\\NOAMGR\\OneDrive - Rafael\\Documents\\Monapol_Danny\\Noam\\MonopolyClientUI\\MonopolyClientUI.csproj",
+        "packagesPath": "C:\\Users\\NOAMGR\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\NOAMGR\\OneDrive - Rafael\\Documents\\Monapol_Danny\\Noam\\MonopolyClientUI\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\NOAMGR\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0-windows"
+        ],
+        "sources": {
+          "C:\\ATEs\\Drivers\\Bin": {},
+          "C:\\ATEs\\nugets": {},
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "C:\\Users\\NOAMGR\\OneDrive - Rafael\\Desktop\\התקנות\\VPSD_Drivers_NuGet": {},
+          "C:\\Users\\NOAMGR\\OneDrive - Rafael\\Desktop\\התקנות\\VPSD_Projects_NuGet": {},
+          "C:\\Users\\NOAMGR\\OneDrive - Rafael\\Desktop\\התקנות\\VPSD_Projects_NuGet\\Vpsd.LoggerClientCS": {},
+          "C:\\Users\\NOAMGR\\source\\nugets": {},
+          "C:\\git\\Scomm_example\\Nugets": {},
+          "https://artifactory.rafael.co.il/artifactory/api/nuget/v3/ACU-nuget-virt-ww": {},
+          "https://artifactory.rafael.co.il/artifactory/api/nuget/v3/ATE_Infra-nuget-virt-ww": {}
+        },
+        "frameworks": {
+          "net8.0-windows7.0": {
+            "targetAlias": "net8.0-windows",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.200"
+      },
+      "frameworks": {
+        "net8.0-windows7.0": {
+          "targetAlias": "net8.0-windows",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WPF": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

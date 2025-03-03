@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "MonopolyServer.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "..\\MonopolyClient\\MonopolyClient.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
