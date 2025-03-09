@@ -1,6 +1,7 @@
 ﻿using System;
 using MonopolyClient;
 using System.Windows.Forms;
+using MonopolyCommon;
 
 namespace MoanpolyClientWinforms
 {
@@ -31,6 +32,8 @@ namespace MoanpolyClientWinforms
                 Invoke(new Action(() =>
                 {
                     btnRollDice.Enabled = isMyTurn && !btnStartGame.Enabled;
+                    if (!btnStartGame.Enabled)
+                        btnEndGame.Enabled = true; // מאופשר אחרי תחילת המשחק
                     WriteToLogger(isMyTurn ? "It's your turn!" : "Waiting for other players...");
                 }));
             };
@@ -43,6 +46,17 @@ namespace MoanpolyClientWinforms
                     UpdatePlayerPositionsDisplay();
                 }));
             };
+
+            _client.GameEnded += (endGameMessage) =>
+            {
+                Invoke(new Action(() =>
+                {
+                    WriteToLogger(endGameMessage);
+                    btnRollDice.Enabled = false;
+                    btnEndGame.Enabled = false;
+                }));
+            };
+
 
             btnConnect.Enabled = false;
             WriteToLogger("Connected to server.");
@@ -78,6 +92,7 @@ namespace MoanpolyClientWinforms
         {
             await _client.StartGameAsync();
             btnStartGame.Enabled = false;
+            btnEndGame.Enabled = true;
             WriteToLogger("The game is starting...");
         }
 
@@ -115,6 +130,12 @@ namespace MoanpolyClientWinforms
             richTextBoxMessages.AppendText(timeStampedMessage + Environment.NewLine);
             richTextBoxMessages.SelectionStart = richTextBoxMessages.Text.Length;
             richTextBoxMessages.ScrollToCaret();
+        }
+
+        private async void btnEndGame_Click(object sender, EventArgs e)
+        {
+            await _client.EndGame();
+            WriteToLogger("You ended the game.");
         }
     }
 }

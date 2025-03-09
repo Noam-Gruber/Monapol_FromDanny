@@ -39,6 +39,7 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.richTextBoxMessages = new System.Windows.Forms.RichTextBox();
+            this.btnEndGame = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -151,11 +152,26 @@
             this.richTextBoxMessages.TabIndex = 10;
             this.richTextBoxMessages.Text = "";
             // 
+            // btnEndGame
+            // 
+            this.btnEndGame.Enabled = false;
+            this.btnEndGame.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
+            this.btnEndGame.Image = ((System.Drawing.Image)(resources.GetObject("btnEndGame.Image")));
+            this.btnEndGame.Location = new System.Drawing.Point(912, 592);
+            this.btnEndGame.Name = "btnEndGame";
+            this.btnEndGame.Size = new System.Drawing.Size(238, 88);
+            this.btnEndGame.TabIndex = 17;
+            this.btnEndGame.Text = "End Game";
+            this.btnEndGame.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
+            this.btnEndGame.UseVisualStyleBackColor = true;
+            this.btnEndGame.Click += new System.EventHandler(this.btnEndGame_Click);
+            // 
             // MonopolyForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1161, 692);
+            this.Controls.Add(this.btnEndGame);
             this.Controls.Add(this.richTextBoxMessages);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
@@ -184,6 +200,7 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.RichTextBox richTextBoxMessages;
+        private System.Windows.Forms.Button btnEndGame;
     }
 }
 

@@ -20,6 +20,7 @@ namespace MonopolyClient
         public event Action<string> MessageReceived;
         public event Action<bool> MyTurnUpdated;
         public event Action PlayersUpdated;
+        public event Action<string> GameEnded;
 
         public GameClient()
         {
@@ -77,6 +78,14 @@ namespace MonopolyClient
                     _myPlayerId = player.Id;
                     MessageReceived?.Invoke($"You joined successfully. Your ID is {_myPlayerId}.");
                     break;
+
+                case "GameEnded":
+                    var endData = gameMessage.Data;
+                    var winnerName = endData.GetProperty("WinnerName").GetString();
+                    var winnerMoney = endData.GetProperty("WinnerMoney").GetInt32();
+                    GameEnded?.Invoke($"Game Over! Winner is {winnerName} with ${winnerMoney}.");
+                    break;
+
             }
         }
 
@@ -85,7 +94,7 @@ namespace MonopolyClient
             var player = Players.FirstOrDefault(p => p.Id == playerId);
             if (player != null)
             {
-                return $"Position: {player.Position}";
+                return $"Position: {player.Position} ({player.CurrentProperty})";
             }
             return "Player not found";
         }
@@ -138,6 +147,16 @@ namespace MonopolyClient
                 Data = JsonSerializer.SerializeToElement(new { })
             };
             await SendMessageAsync(rollMessage);
+        }
+
+        public async Task EndGame()
+        {
+            var endGameEndGame = new GameMessage
+            {
+                Type = "EndGame",
+                Data = JsonSerializer.SerializeToElement(new { })
+            };
+            await SendMessageAsync(endGameEndGame);
         }
 
         public void Disconnect()
