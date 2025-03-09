@@ -54,18 +54,19 @@ namespace MonopolyServer
 
             _playersReady.Add(clientId);
 
-            if (_playersReady.Count == _gameState.Players.Count)
+            if (_playersReady.Count == _gameState.Players.Count || _gameState.Players.Count == 1)
             {
                 _isGameStarted = true;
                 _gameState.CurrentPlayerIndex = 0;
-                Console.WriteLine("Game started!");
+                Console.WriteLine("Game started immediately!");
                 BroadcastGameState();
             }
             else
             {
-                Console.WriteLine($"{_playersReady.Count}/{_gameState.Players.Count} players are ready to start the game.");
+                Console.WriteLine($"{_playersReady.Count}/{_gameState.Players.Count} players are ready.");
             }
         }
+
 
         private void HandleRollDice(string clientId)
         {
@@ -112,11 +113,11 @@ namespace MonopolyServer
             var player = new Player { Id = clientId, Name = playerName, Position = 0 };
             _gameState.Players.Add(player);
 
-            // שליחת הודעה לשחקן שהצטרף עם ה-Id שלו
+            // שליחת הודעה לשחקן שהצטרף עם ה-Id שלו ושמו
             var joinSuccessMsg = new GameMessage
             {
                 Type = "JoinGameSuccess",
-                Data = JsonSerializer.SerializeToElement(new { PlayerId = clientId })
+                Data = JsonSerializer.SerializeToElement(player) // לשלוח את כל האובייקט של השחקן
             };
 
             string json = JsonSerializer.Serialize(joinSuccessMsg);
@@ -245,5 +246,19 @@ namespace MonopolyServer
                 }
             }
         }
+
+        public void Stop()
+        {
+            Console.WriteLine("Stopping server...");
+
+            _listener.Stop(); // עוצר את ה-listener מלקבל לקוחות חדשים
+            foreach (var client in _clients.Values)
+            {
+                client.Close(); // סגירת כל החיבורים הפעילים
+            }
+
+            Console.WriteLine("Server stopped.");
+        }
+
     }
 }
