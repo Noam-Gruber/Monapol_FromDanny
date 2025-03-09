@@ -38,6 +38,9 @@ namespace MonopolyServer
                 case "RollDice":
                     HandleRollDice(clientId);
                     break;
+                case "BuyProperty":
+                    HandleBuyProperty(clientId, msg.Data);
+                    break;
                 case "EndGame":
                     HandleEndGame(clientId);
                     break;
@@ -90,6 +93,18 @@ namespace MonopolyServer
             int diceRoll = rnd.Next(1, 7) + rnd.Next(1, 7);
             currentPlayer.Position = (currentPlayer.Position + diceRoll) % 40;
             currentPlayer.CurrentProperty = _board.Spaces[currentPlayer.Position].Name;
+
+            var space = _board.Spaces[currentPlayer.Position];
+            // בדיקה אם צריך לשלם שכירות
+            if (space.IsOwned && space.OwnedByPlayerId != clientId)
+            {
+                var owner = _gameState.Players.First(p => p.Id == space.OwnedByPlayerId);
+                currentPlayer.Money -= space.RentPrice;
+                owner.Money += space.RentPrice;
+
+                Console.WriteLine($"{currentPlayer.Name} paid ${space.RentPrice} to {owner.Name} for landing on {space.Name}.");
+            }
+
             // עדכון מיקום השחקן בלוח
             _board.UpdatePlayerPosition(clientId, currentPlayer.Position);
             Console.WriteLine($"{currentPlayer.Name} rolled {diceRoll} and moved to {currentPlayer.Position}");
@@ -97,6 +112,27 @@ namespace MonopolyServer
             _gameState.CurrentPlayerIndex = (_gameState.CurrentPlayerIndex + 1) % _gameState.Players.Count;
             BroadcastGameState();
         }
+
+        private void HandleBuyProperty(string clientId, JsonElement data)
+        {
+            string propertyName = data.GetProperty("PropertyName").GetString();
+            var space = _board.Spaces.FirstOrDefault(s => s.Name == propertyName);
+            var player = _gameState.Players.First(p => p.Id == clientId);
+
+            if (space != null && !space.IsOwned && player.Money >= space.PurchasePrice)
+            {
+                player.Money -= space.PurchasePrice;
+                space.OwnedByPlayerId = clientId; // רק זה דרוש
+                Console.WriteLine($"{player.Name} bought {space.Name} for ${space.PurchasePrice}");
+
+                BroadcastGameState();
+            }
+            else
+            {
+                Console.WriteLine($"{player.Name} can't buy {propertyName}");
+            }
+        }
+
 
         private void HandleEndGame(string clientId)
         {
@@ -283,11 +319,20 @@ namespace MonopolyServer
             string json = JsonSerializer.Serialize(endGameMessage);
             byte[] data = Encoding.UTF8.GetBytes(json);
 
-            foreach (var client in _clients.Values)
+            foreach (var kvp in _clients)
             {
+                var client = kvp.Value;
                 if (client.Connected)
                 {
-                    await client.GetStream().WriteAsync(data, 0, data.Length);
+                    try
+                    {
+                        var stream = client.GetStream();
+                        await stream.WriteAsync(data, 0, data.Length);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error sending to client {kvp.Key}: {ex.Message}");
+                    }
                 }
             }
 
