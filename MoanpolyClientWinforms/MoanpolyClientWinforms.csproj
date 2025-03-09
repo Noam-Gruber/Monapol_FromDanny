@@ -80,6 +80,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Forms\Form_buy.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Form_buy.Designer.cs">
+      <DependentUpon>Form_buy.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Form_rent.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Form_rent.Designer.cs">
+      <DependentUpon>Form_rent.cs</DependentUpon>
+    </Compile>
     <Compile Include="GameClient.cs" />
     <Compile Include="MonopolyForm.cs">
       <SubType>Form</SubType>
@@ -89,6 +101,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Forms\Form_buy.resx">
+      <DependentUpon>Form_buy.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Form_rent.resx">
+      <DependentUpon>Form_rent.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MonopolyForm.resx">
       <DependentUpon>MonopolyForm.cs</DependentUpon>
     </EmbeddedResource>
