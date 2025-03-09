@@ -28,9 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form_rent));
             this.textBox_rentMoney = new System.Windows.Forms.TextBox();
             this.textBox_nameOfProperty = new System.Windows.Forms.TextBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnOK = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
@@ -55,16 +56,17 @@
             this.textBox_nameOfProperty.Size = new System.Drawing.Size(96, 20);
             this.textBox_nameOfProperty.TabIndex = 10;
             // 
-            // button1
+            // btnOK
             // 
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            this.button1.Location = new System.Drawing.Point(83, 70);
-            this.button1.Margin = new System.Windows.Forms.Padding(2);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(50, 31);
-            this.button1.TabIndex = 9;
-            this.button1.Text = "OK";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btnOK.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
+            this.btnOK.Location = new System.Drawing.Point(90, 68);
+            this.btnOK.Margin = new System.Windows.Forms.Padding(2);
+            this.btnOK.Name = "btnOK";
+            this.btnOK.Size = new System.Drawing.Size(50, 31);
+            this.btnOK.TabIndex = 9;
+            this.btnOK.Text = "OK";
+            this.btnOK.UseVisualStyleBackColor = true;
+            this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
             // label4
             // 
@@ -95,12 +97,13 @@
             this.ClientSize = new System.Drawing.Size(225, 110);
             this.Controls.Add(this.textBox_rentMoney);
             this.Controls.Add(this.textBox_nameOfProperty);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnOK);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form_rent";
-            this.Text = "Form_rent";
+            this.Text = "Pay Rent";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -110,7 +113,7 @@
 
         private System.Windows.Forms.TextBox textBox_rentMoney;
         private System.Windows.Forms.TextBox textBox_nameOfProperty;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label1;
     }

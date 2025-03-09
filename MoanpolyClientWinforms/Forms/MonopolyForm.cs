@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Linq;
 using MonopolyClient;
 using System.Windows.Forms;
-using MonopolyCommon;
+using MonapolClientUI.Forms;
 
 namespace MoanpolyClientWinforms
 {
     public partial class MonopolyForm: Form
     {
         private GameClient _client;
+        private Form_buy buyForm = null;
+        private bool _buyFormOpenedThisTurn = false;
 
         public MonopolyForm()
         {
@@ -32,11 +35,27 @@ namespace MoanpolyClientWinforms
                 Invoke(new Action(() =>
                 {
                     btnRollDice.Enabled = isMyTurn && !btnStartGame.Enabled;
-                    if (!btnStartGame.Enabled)
-                        btnEndGame.Enabled = true; // מאופשר אחרי תחילת המשחק
+                    btnEndGame.Enabled = !btnStartGame.Enabled;
+
+                    if (isMyTurn && !_buyFormOpenedThisTurn)
+                    {
+                        var player = _client.Players.FirstOrDefault(p => p.Id == _client.MyPlayerId);
+                        var currentSpace = _client.BoardSpaces[player.Position];
+
+                        if (!currentSpace.IsOwned && !currentSpace.IsSpecial && player.Money >= currentSpace.PurchasePrice)
+                        {
+                            _buyFormOpenedThisTurn = true; // הגדרת החלון כנפתח עבור התור הנוכחי
+                            using (Form_buy buyForm = new Form_buy(_client, currentSpace))
+                            {
+                                buyForm.ShowDialog();
+                            }
+                        }
+                    }
+
                     WriteToLogger(isMyTurn ? "It's your turn!" : "Waiting for other players...");
                 }));
             };
+
 
             // להוסיף את הקטע הבא:
             _client.PlayersUpdated += () =>
@@ -84,6 +103,7 @@ namespace MoanpolyClientWinforms
 
         private async void btnRollDice_Click(object sender, EventArgs e)
         {
+            _buyFormOpenedThisTurn = false;
             await _client.RollDiceAsync();  // שלח בקשה לשרת לביצוע גלגול קוביות
             WriteToLogger("Roll Dice");
         }
@@ -93,6 +113,7 @@ namespace MoanpolyClientWinforms
             await _client.StartGameAsync();
             btnStartGame.Enabled = false;
             btnEndGame.Enabled = true;
+            btnRollDice.Enabled = true;
             WriteToLogger("The game is starting...");
         }
 
@@ -122,10 +143,6 @@ namespace MoanpolyClientWinforms
 
         private void WriteToLogger(string message)
         {
-            //string timeStampedMessage = $"{DateTime.Now:HH:mm:ss} - {message}";
-            //richTextBoxMessages.AppendText(timeStampedMessage + Environment.NewLine);
-            //richTextBoxMessages.ScrollToCaret();
-
             string timeStampedMessage = $"{DateTime.Now:HH:mm:ss} - {message}";
             richTextBoxMessages.AppendText(timeStampedMessage + Environment.NewLine);
             richTextBoxMessages.SelectionStart = richTextBoxMessages.Text.Length;

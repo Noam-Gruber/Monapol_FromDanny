@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MonopolyServer;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,5 +9,6 @@ namespace MonopolyCommon
     {
         public List<Player> Players { get; set; } = new List<Player>();
         public int CurrentPlayerIndex { get; set; }
+        public Board Board { get; set; } = new Board();
     }
 }

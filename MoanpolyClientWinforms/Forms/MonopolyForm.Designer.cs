@@ -113,7 +113,7 @@
             // 
             this.lstPlayerPositions.FormattingEnabled = true;
             this.lstPlayerPositions.Location = new System.Drawing.Point(920, 60);
-            this.lstPlayerPositions.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.lstPlayerPositions.Margin = new System.Windows.Forms.Padding(2);
             this.lstPlayerPositions.Name = "lstPlayerPositions";
             this.lstPlayerPositions.Size = new System.Drawing.Size(230, 251);
             this.lstPlayerPositions.TabIndex = 7;
@@ -122,9 +122,9 @@
             // 
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(1, 60);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(906, 519);
+            this.pictureBox1.Size = new System.Drawing.Size(906, 528);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 8;
             this.pictureBox1.TabStop = false;
@@ -136,9 +136,9 @@
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.btnStartGame);
             this.groupBox1.Location = new System.Drawing.Point(129, -2);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox1.Size = new System.Drawing.Size(469, 55);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
@@ -146,7 +146,7 @@
             // richTextBoxMessages
             // 
             this.richTextBoxMessages.Location = new System.Drawing.Point(1, 592);
-            this.richTextBoxMessages.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.richTextBoxMessages.Margin = new System.Windows.Forms.Padding(2);
             this.richTextBoxMessages.Name = "richTextBoxMessages";
             this.richTextBoxMessages.Size = new System.Drawing.Size(906, 86);
             this.richTextBoxMessages.TabIndex = 10;

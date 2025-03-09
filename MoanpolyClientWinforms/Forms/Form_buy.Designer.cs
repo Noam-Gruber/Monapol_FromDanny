@@ -28,9 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.button2 = new System.Windows.Forms.Button();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form_buy));
+            this.btnCancel = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnOK = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.textBox_nameOfProperty = new System.Windows.Forms.TextBox();
@@ -38,16 +39,17 @@
             this.textBox_rentProperty = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
-            // button2
+            // btnCancel
             // 
-            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            this.button2.Location = new System.Drawing.Point(124, 104);
-            this.button2.Margin = new System.Windows.Forms.Padding(2);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(93, 29);
-            this.button2.TabIndex = 20;
-            this.button2.Text = "Cancel";
-            this.button2.UseVisualStyleBackColor = true;
+            this.btnCancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
+            this.btnCancel.Location = new System.Drawing.Point(124, 104);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(2);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(93, 29);
+            this.btnCancel.TabIndex = 20;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // label6
             // 
@@ -60,16 +62,17 @@
             this.label6.TabIndex = 18;
             this.label6.Text = "Buy Property:";
             // 
-            // button1
+            // btnOK
             // 
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            this.button1.Location = new System.Drawing.Point(17, 104);
-            this.button1.Margin = new System.Windows.Forms.Padding(2);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(91, 29);
-            this.button1.TabIndex = 17;
-            this.button1.Text = "OK";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btnOK.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
+            this.btnOK.Location = new System.Drawing.Point(17, 104);
+            this.btnOK.Margin = new System.Windows.Forms.Padding(2);
+            this.btnOK.Name = "btnOK";
+            this.btnOK.Size = new System.Drawing.Size(91, 29);
+            this.btnOK.TabIndex = 17;
+            this.btnOK.Text = "OK";
+            this.btnOK.UseVisualStyleBackColor = true;
+            this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
             // label4
             // 
@@ -95,24 +98,30 @@
             // 
             // textBox_nameOfProperty
             // 
+            this.textBox_nameOfProperty.Enabled = false;
             this.textBox_nameOfProperty.Location = new System.Drawing.Point(116, 6);
             this.textBox_nameOfProperty.Name = "textBox_nameOfProperty";
             this.textBox_nameOfProperty.Size = new System.Drawing.Size(100, 20);
             this.textBox_nameOfProperty.TabIndex = 21;
+            this.textBox_nameOfProperty.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // textBox_buyProperty
             // 
+            this.textBox_buyProperty.Enabled = false;
             this.textBox_buyProperty.Location = new System.Drawing.Point(116, 36);
             this.textBox_buyProperty.Name = "textBox_buyProperty";
             this.textBox_buyProperty.Size = new System.Drawing.Size(100, 20);
             this.textBox_buyProperty.TabIndex = 22;
+            this.textBox_buyProperty.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // textBox_rentProperty
             // 
+            this.textBox_rentProperty.Enabled = false;
             this.textBox_rentProperty.Location = new System.Drawing.Point(116, 71);
             this.textBox_rentProperty.Name = "textBox_rentProperty";
             this.textBox_rentProperty.Size = new System.Drawing.Size(100, 20);
             this.textBox_rentProperty.TabIndex = 23;
+            this.textBox_rentProperty.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Form_buy
             // 
@@ -122,14 +131,15 @@
             this.Controls.Add(this.textBox_rentProperty);
             this.Controls.Add(this.textBox_buyProperty);
             this.Controls.Add(this.textBox_nameOfProperty);
-            this.Controls.Add(this.button2);
+            this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.label6);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnOK);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form_buy";
-            this.Text = "Form_buy";
+            this.Text = "Buy Property";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -137,9 +147,9 @@
 
         #endregion
 
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox_nameOfProperty;

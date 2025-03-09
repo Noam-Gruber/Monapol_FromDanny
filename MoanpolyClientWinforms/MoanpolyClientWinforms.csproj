@@ -93,10 +93,10 @@
       <DependentUpon>Form_rent.cs</DependentUpon>
     </Compile>
     <Compile Include="GameClient.cs" />
-    <Compile Include="MonopolyForm.cs">
+    <Compile Include="Forms\MonopolyForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MonopolyForm.Designer.cs">
+    <Compile Include="Forms\MonopolyForm.Designer.cs">
       <DependentUpon>MonopolyForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
@@ -107,7 +107,7 @@
     <EmbeddedResource Include="Forms\Form_rent.resx">
       <DependentUpon>Form_rent.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MonopolyForm.resx">
+    <EmbeddedResource Include="Forms\MonopolyForm.resx">
       <DependentUpon>MonopolyForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -143,10 +143,12 @@
   <ItemGroup>
     <Content Include="Images\board-game.ico" />
     <Content Include="Images\board.jpg" />
+    <Content Include="Images\buy_icon.ico" />
     <Content Include="Images\dices_32x32.png" />
     <Content Include="Images\game.png" />
     <Content Include="Images\grocery-store.png" />
     <Content Include="Images\house.png" />
+    <Content Include="Images\rent_icon.ico" />
     <Content Include="Images\video.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using MonopolyCommon;
+using MonopolyServer;
 using System.Text.Json;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -15,7 +16,10 @@ namespace MonopolyClient
         private NetworkStream _stream;
         private string _myPlayerId;
 
-        public List<Player> Players { get; private set; } 
+        public string MyPlayerId => _myPlayerId;
+        public Board Board { get; private set; }
+        public List<Player> Players { get; private set; }
+        public List<BoardSpace> BoardSpaces { get; private set; }
 
         public event Action<string> MessageReceived;
         public event Action<bool> MyTurnUpdated;
@@ -67,7 +71,7 @@ namespace MonopolyClient
                 case "GameStateUpdate":
                     var gameState = JsonSerializer.Deserialize<GameState>(gameMessage.Data.ToString());
                     Players = gameState.Players;
-
+                    BoardSpaces = gameState.Board.Spaces;
                     bool isMyTurn = Players[gameState.CurrentPlayerIndex].Id == _myPlayerId;
                     MyTurnUpdated?.Invoke(isMyTurn);
                     PlayersUpdated?.Invoke();
@@ -80,12 +84,11 @@ namespace MonopolyClient
                     break;
 
                 case "GameEnded":
-                    var endData = gameMessage.Data;
-                    var winnerName = endData.GetProperty("WinnerName").GetString();
-                    var winnerMoney = endData.GetProperty("WinnerMoney").GetInt32();
-                    GameEnded?.Invoke($"Game Over! Winner is {winnerName} with ${winnerMoney}.");
+                    string winnerName = gameMessage.Data.GetProperty("WinnerName").GetString();
+                    int winnerMoney = gameMessage.Data.GetProperty("WinnerMoney").GetInt32();
+                    string endGameMessage = $"Game Ended! Winner: {winnerName}, Money: ${winnerMoney}";
+                    GameEnded?.Invoke(endGameMessage);
                     break;
-
             }
         }
 
@@ -151,13 +154,17 @@ namespace MonopolyClient
 
         public async Task EndGame()
         {
-            var endGameEndGame = new GameMessage
-            {
-                Type = "EndGame",
-                Data = JsonSerializer.SerializeToElement(new { })
-            };
-            await SendMessageAsync(endGameEndGame);
+            await SendMessageAsync(new GameMessage { Type = "EndGame", Data = JsonSerializer.SerializeToElement(new { }) });
         }
+        //public async Task EndGame()
+        //{
+        //    var endGameEndGame = new GameMessage
+        //    {
+        //        Type = "EndGame",
+        //        Data = JsonSerializer.SerializeToElement(new { })
+        //    };
+        //    await SendMessageAsync(endGameEndGame);
+        //}
 
         public void Disconnect()
         {
