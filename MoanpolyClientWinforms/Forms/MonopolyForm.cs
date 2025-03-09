@@ -9,7 +9,7 @@ namespace MoanpolyClientWinforms
     public partial class MonopolyForm: Form
     {
         private GameClient _client;
-        private Form_buy buyForm = null;
+        //private Form_buy buyForm = null;
         private bool _buyFormOpenedThisTurn = false;
 
         public MonopolyForm()
@@ -56,8 +56,6 @@ namespace MoanpolyClientWinforms
                 }));
             };
 
-
-            // להוסיף את הקטע הבא:
             _client.PlayersUpdated += () =>
             {
                 Invoke(new Action(() =>
@@ -76,12 +74,9 @@ namespace MoanpolyClientWinforms
                 }));
             };
 
-
             btnConnect.Enabled = false;
             WriteToLogger("Connected to server.");
         }
-
-
 
         private async void btnJoinGame_Click(object sender, EventArgs e)
         {
@@ -117,6 +112,12 @@ namespace MoanpolyClientWinforms
             WriteToLogger("The game is starting...");
         }
 
+        private async void btnEndGame_Click(object sender, EventArgs e)
+        {
+            await _client.EndGame();
+            WriteToLogger("You ended the game.");
+        }
+
         private void MonopolyForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             _client?.Disconnect();
@@ -149,10 +150,5 @@ namespace MoanpolyClientWinforms
             richTextBoxMessages.ScrollToCaret();
         }
 
-        private async void btnEndGame_Click(object sender, EventArgs e)
-        {
-            await _client.EndGame();
-            WriteToLogger("You ended the game.");
-        }
     }
 }
