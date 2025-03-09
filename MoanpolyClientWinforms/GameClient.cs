@@ -19,6 +19,7 @@ namespace MonopolyClient
 
         public event Action<string> MessageReceived;
         public event Action<bool> MyTurnUpdated;
+        public event Action PlayersUpdated;
 
         public GameClient()
         {
@@ -52,20 +53,30 @@ namespace MonopolyClient
         private void HandleMessage(string messageJson)
         {
             var gameMessage = JsonSerializer.Deserialize<GameMessage>(messageJson);
+
             if (gameMessage == null) return;
 
-            if (gameMessage.Type == "GameStateUpdate")
+            switch (gameMessage.Type)
             {
-                var gameState = JsonSerializer.Deserialize<GameState>(gameMessage.Data.ToString());
-                Players = gameState.Players;
+                case "PlayerListUpdate":
+                    Players = JsonSerializer.Deserialize<List<Player>>(gameMessage.Data.ToString());
+                    PlayersUpdated?.Invoke();
+                    break;
 
-                bool isMyTurn = Players[gameState.CurrentPlayerIndex].Id == _myPlayerId;
-                MyTurnUpdated?.Invoke(isMyTurn);
-            }
-            else if (gameMessage.Type == "JoinGameSuccess") // הוספת סוג הודעה חדש
-            {
-                _myPlayerId = gameMessage.Data.GetProperty("PlayerId").GetString();
-                MessageReceived?.Invoke($"You joined the game successfully. Your ID is {_myPlayerId}.");
+                case "GameStateUpdate":
+                    var gameState = JsonSerializer.Deserialize<GameState>(gameMessage.Data.ToString());
+                    Players = gameState.Players;
+
+                    bool isMyTurn = Players[gameState.CurrentPlayerIndex].Id == _myPlayerId;
+                    MyTurnUpdated?.Invoke(isMyTurn);
+                    PlayersUpdated?.Invoke();
+                    break;
+
+                case "JoinGameSuccess":
+                    var player = JsonSerializer.Deserialize<Player>(gameMessage.Data.ToString());
+                    _myPlayerId = player.Id;
+                    MessageReceived?.Invoke($"You joined successfully. Your ID is {_myPlayerId}.");
+                    break;
             }
         }
 

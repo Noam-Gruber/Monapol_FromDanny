@@ -45,6 +45,7 @@
             // 
             // btnRollDice
             // 
+            this.btnRollDice.Enabled = false;
             this.btnRollDice.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
             this.btnRollDice.Image = ((System.Drawing.Image)(resources.GetObject("btnRollDice.Image")));
             this.btnRollDice.Location = new System.Drawing.Point(920, 9);

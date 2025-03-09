@@ -16,29 +16,39 @@ namespace MoanpolyClientWinforms
         private async void btnConnect_Click(object sender, EventArgs e)
         {
             _client = new GameClient();
-            await _client.ConnectAsync("127.0.0.1", 5000);  // חיבור לשרת
+            await _client.ConnectAsync("127.0.0.1", 5000);
+
             _client.MessageReceived += (message) =>
             {
                 Invoke(new Action(() =>
                 {
-                    WriteToLogger($"{DateTime.Now:HH:mm:ss} - {message}");
-                    // אחרי קבלת הודעה, עדכן את המיקומים ב-UI
-                    UpdatePlayerPositionsDisplay();  // עדכון המיקומים ב-UI
+                    WriteToLogger(message);
                 }));
             };
 
-            // האזן לאירוע התור שלך
             _client.MyTurnUpdated += (isMyTurn) =>
             {
                 Invoke(new Action(() =>
                 {
-                    btnRollDice.Enabled = isMyTurn;
+                    btnRollDice.Enabled = isMyTurn && !btnStartGame.Enabled;
                     WriteToLogger(isMyTurn ? "It's your turn!" : "Waiting for other players...");
                 }));
             };
 
+            // להוסיף את הקטע הבא:
+            _client.PlayersUpdated += () =>
+            {
+                Invoke(new Action(() =>
+                {
+                    UpdatePlayerPositionsDisplay();
+                }));
+            };
+
+            btnConnect.Enabled = false;
             WriteToLogger("Connected to server.");
         }
+
+
 
         private async void btnJoinGame_Click(object sender, EventArgs e)
         {
@@ -62,14 +72,13 @@ namespace MoanpolyClientWinforms
         {
             await _client.RollDiceAsync();  // שלח בקשה לשרת לביצוע גלגול קוביות
             WriteToLogger("Roll Dice");
-            UpdatePlayerPositionsDisplay();  // עדכון המיקומים ב-UI
         }
 
         private async void btnStartGame_Click(object sender, EventArgs e)
         {
             await _client.StartGameAsync();
-            WriteToLogger("The game is starting :-)");
             btnStartGame.Enabled = false;
+            WriteToLogger("The game is starting...");
         }
 
         private void MonopolyForm_FormClosing(object sender, FormClosingEventArgs e)
