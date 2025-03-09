@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Net;
-using System.Net.Sockets;
+﻿using System.Net;
 using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
 using MonopolyCommon;
+using System.Text.Json;
+using System.Net.Sockets;
+using System.Collections.Concurrent;
 
 namespace MonopolyServer
 {
@@ -16,55 +12,14 @@ namespace MonopolyServer
         private readonly TcpListener _listener;
         private readonly ConcurrentDictionary<string, TcpClient> _clients = new();
         private readonly GameState _gameState = new();
-        private readonly Board _board = new Board();  // לוח המשחק
+        private readonly Board _board = new Board();
+
         private bool _isGameStarted = false;
         private HashSet<string> _playersReady = new HashSet<string>(); // שחקנים שמוכנים להתחיל
 
         public GameServer(int port)
         {
             _listener = new TcpListener(IPAddress.Any, port);
-        }
-
-        public async Task StartAsync()
-        {
-            _listener.Start();
-            Console.WriteLine("Server started...");
-
-            while (true)
-            {
-                var client = await _listener.AcceptTcpClientAsync();
-                _ = HandleClientAsync(client);
-            }
-        }
-
-        private async Task HandleClientAsync(TcpClient client)
-        {
-            string clientId = Guid.NewGuid().ToString();
-            _clients.TryAdd(clientId, client);
-            Console.WriteLine($"Client connected: {clientId}");
-
-            using var stream = client.GetStream();
-            byte[] buffer = new byte[4096];
-
-            try
-            {
-                while (true)
-                {
-                    int byteCount = await stream.ReadAsync(buffer, 0, buffer.Length);
-                    if (byteCount == 0) break;
-
-                    string messageJson = Encoding.UTF8.GetString(buffer, 0, byteCount);
-                    ProcessMessage(clientId, messageJson);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error with client {clientId}: {ex.Message}");
-            }
-
-            _clients.TryRemove(clientId, out _);
-            _playersReady.Remove(clientId); // השחקן התנתק
-            Console.WriteLine($"Client disconnected: {clientId}");
         }
 
         private void ProcessMessage(string clientId, string messageJson)
@@ -87,26 +42,6 @@ namespace MonopolyServer
                     Console.WriteLine($"Unknown message type: {msg.Type}");
                     break;
             }
-        }
-
-        private async Task HandleJoinGame(string clientId, JsonElement data)
-        {
-            string playerName = data.GetProperty("Name").GetString();
-            var player = new Player { Id = clientId, Name = playerName, Position = 0 };
-            _gameState.Players.Add(player);
-
-            // שליחת הודעה לשחקן שהצטרף עם ה-Id שלו
-            var joinSuccessMsg = new GameMessage
-            {
-                Type = "JoinGameSuccess",
-                Data = JsonSerializer.SerializeToElement(new { PlayerId = clientId })
-            };
-
-            string json = JsonSerializer.Serialize(joinSuccessMsg);
-            byte[] bytes = Encoding.UTF8.GetBytes(json);
-            await _clients[clientId].GetStream().WriteAsync(bytes, 0, bytes.Length);
-
-            await BroadcastGameState();
         }
 
         private void HandleStartGame(string clientId)
@@ -157,6 +92,68 @@ namespace MonopolyServer
 
             _gameState.CurrentPlayerIndex = (_gameState.CurrentPlayerIndex + 1) % _gameState.Players.Count;
             BroadcastGameState();
+        }
+
+        public async Task StartAsync()
+        {
+            _listener.Start();
+            Console.WriteLine("Server started...");
+
+            while (true)
+            {
+                var client = await _listener.AcceptTcpClientAsync();
+                _ = HandleClientAsync(client);
+            }
+        }
+
+        private async Task HandleJoinGame(string clientId, JsonElement data)
+        {
+            string playerName = data.GetProperty("Name").GetString();
+            var player = new Player { Id = clientId, Name = playerName, Position = 0 };
+            _gameState.Players.Add(player);
+
+            // שליחת הודעה לשחקן שהצטרף עם ה-Id שלו
+            var joinSuccessMsg = new GameMessage
+            {
+                Type = "JoinGameSuccess",
+                Data = JsonSerializer.SerializeToElement(new { PlayerId = clientId })
+            };
+
+            string json = JsonSerializer.Serialize(joinSuccessMsg);
+            byte[] bytes = Encoding.UTF8.GetBytes(json);
+            await _clients[clientId].GetStream().WriteAsync(bytes, 0, bytes.Length);
+
+            await BroadcastGameState();
+        }
+
+        private async Task HandleClientAsync(TcpClient client)
+        {
+            string clientId = Guid.NewGuid().ToString();
+            _clients.TryAdd(clientId, client);
+            Console.WriteLine($"Client connected: {clientId}");
+
+            using var stream = client.GetStream();
+            byte[] buffer = new byte[4096];
+
+            try
+            {
+                while (true)
+                {
+                    int byteCount = await stream.ReadAsync(buffer, 0, buffer.Length);
+                    if (byteCount == 0) break;
+
+                    string messageJson = Encoding.UTF8.GetString(buffer, 0, byteCount);
+                    ProcessMessage(clientId, messageJson);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error with client {clientId}: {ex.Message}");
+            }
+
+            _clients.TryRemove(clientId, out _);
+            _playersReady.Remove(clientId); // השחקן התנתק
+            Console.WriteLine($"Client disconnected: {clientId}");
         }
 
         private async Task BroadcastGameState()
