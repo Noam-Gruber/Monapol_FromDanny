@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MonopolyClient")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bd55302dde1f099479d9add538d555e5d7c0310c")]
 [assembly: System.Reflection.AssemblyProductAttribute("MonopolyClient")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MonopolyClient")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

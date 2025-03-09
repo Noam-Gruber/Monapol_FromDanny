@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace MonopolyGame
+namespace MonopolyServer
 {
     class Program
     {

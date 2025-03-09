@@ -26,3 +26,4 @@ C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\ob
 C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.pdb
 C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.genruntimeconfig.cache
 C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\obj\Debug\net8.0\ref\MonopolyClient.dll
+C:\Users\NOAMGR\OneDrive - Rafael\Documents\Monapol_Danny\Noam\MonopolyClient\obj\Debug\net8.0\MonopolyClient.sourcelink.json
