@@ -13,28 +13,9 @@ namespace MoanpolyClientWinforms
             InitializeComponent();
         }
 
-        private void UpdatePlayerPositionsDisplay()
-        {
-            if (_client != null && _client.Players != null)
-            {
-                lstPlayerPositions.Items.Clear();
-                foreach (var player in _client.Players)
-                {
-                    string position = _client.GetPlayerPositionDisplay(player.Id);  // קריאה לפונקציה
-                    lstPlayerPositions.Items.Add($"{player.Name}: {position}");  // עדכון ה-UI עם המיקום
-                }
-                btnConnect.Text = "Connected";
-                btnConnect.Enabled = false;
-            }
-            else
-            {
-                WriteToLogger("Client or Player list is not initialized");
-            }
-        }   
-
         private async void btnConnect_Click(object sender, EventArgs e)
         {
-            _client = new GameClient();  // אתחול כ- GameClient
+            _client = new GameClient();
             await _client.ConnectAsync("127.0.0.1", 5000);  // חיבור לשרת
             _client.MessageReceived += (message) =>
             {
@@ -84,16 +65,35 @@ namespace MoanpolyClientWinforms
             UpdatePlayerPositionsDisplay();  // עדכון המיקומים ב-UI
         }
 
-        private void MonopolyForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            _client?.Disconnect();
-        }
-
         private async void btnStartGame_Click(object sender, EventArgs e)
         {
             await _client.StartGameAsync();
             WriteToLogger("The game is starting :-)");
             btnStartGame.Enabled = false;
+        }
+
+        private void MonopolyForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            _client?.Disconnect();
+        }
+
+        private void UpdatePlayerPositionsDisplay()
+        {
+            if (_client != null && _client.Players != null)
+            {
+                lstPlayerPositions.Items.Clear();
+                foreach (var player in _client.Players)
+                {
+                    string position = _client.GetPlayerPositionDisplay(player.Id);  // קריאה לפונקציה
+                    lstPlayerPositions.Items.Add($"{player.Name}: {position}");  // עדכון ה-UI עם המיקום
+                }
+                btnConnect.Text = "Connected";
+                btnConnect.Enabled = false;
+            }
+            else
+            {
+                WriteToLogger("Client or Player list is not initialized");
+            }
         }
 
         private void WriteToLogger(string message)

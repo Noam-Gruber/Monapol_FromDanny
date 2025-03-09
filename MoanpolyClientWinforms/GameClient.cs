@@ -25,35 +25,6 @@ namespace MonopolyClient
             Players = new List<Player>();
         }
 
-        private void HandleMessage(string messageJson)
-        {
-            var gameMessage = JsonSerializer.Deserialize<GameMessage>(messageJson);
-            if (gameMessage == null) return;
-
-            if (gameMessage.Type == "GameStateUpdate")
-            {
-                var gameState = JsonSerializer.Deserialize<GameState>(gameMessage.Data.ToString());
-                Players = gameState.Players;
-
-                bool isMyTurn = Players[gameState.CurrentPlayerIndex].Id == _myPlayerId;
-                MyTurnUpdated?.Invoke(isMyTurn);
-            }
-            else if (gameMessage.Type == "JoinGameSuccess") // הוספת סוג הודעה חדש
-            {
-                _myPlayerId = gameMessage.Data.GetProperty("PlayerId").GetString();
-                MessageReceived?.Invoke($"You joined the game successfully. Your ID is {_myPlayerId}.");
-            }
-        }
-
-
-        public async Task ConnectAsync(string ipAddress, int port)
-        {
-            _client = new TcpClient();
-            await _client.ConnectAsync(ipAddress, port);
-            _stream = _client.GetStream();
-            StartListening();
-        }
-
         private async void StartListening()
         {
             byte[] buffer = new byte[4096];
@@ -78,12 +49,51 @@ namespace MonopolyClient
             }
         }
 
+        private void HandleMessage(string messageJson)
+        {
+            var gameMessage = JsonSerializer.Deserialize<GameMessage>(messageJson);
+            if (gameMessage == null) return;
+
+            if (gameMessage.Type == "GameStateUpdate")
+            {
+                var gameState = JsonSerializer.Deserialize<GameState>(gameMessage.Data.ToString());
+                Players = gameState.Players;
+
+                bool isMyTurn = Players[gameState.CurrentPlayerIndex].Id == _myPlayerId;
+                MyTurnUpdated?.Invoke(isMyTurn);
+            }
+            else if (gameMessage.Type == "JoinGameSuccess") // הוספת סוג הודעה חדש
+            {
+                _myPlayerId = gameMessage.Data.GetProperty("PlayerId").GetString();
+                MessageReceived?.Invoke($"You joined the game successfully. Your ID is {_myPlayerId}.");
+            }
+        }
+
+        public string GetPlayerPositionDisplay(string playerId)
+        {
+            var player = Players.FirstOrDefault(p => p.Id == playerId);
+            if (player != null)
+            {
+                return $"Position: {player.Position}";
+            }
+            return "Player not found";
+        }
+
+        public async Task ConnectAsync(string ipAddress, int port)
+        {
+            _client = new TcpClient();
+            await _client.ConnectAsync(ipAddress, port);
+            _stream = _client.GetStream();
+            StartListening();
+        }
+
         public async Task SendMessageAsync(GameMessage message)
         {
             string json = JsonSerializer.Serialize(message);
             byte[] data = Encoding.UTF8.GetBytes(json);
             await _stream.WriteAsync(data, 0, data.Length);
         }
+
         public async Task JoinGameAsync(string playerName)
         {
             var joinMessage = new GameMessage
@@ -97,16 +107,6 @@ namespace MonopolyClient
             {
                 Players = new List<Player>();
             }
-        }
-
-        public string GetPlayerPositionDisplay(string playerId)
-        {
-            var player = Players.FirstOrDefault(p => p.Id == playerId);
-            if (player != null)
-            {
-                return $"Position: {player.Position}";
-            }
-            return "Player not found";
         }
 
         public async Task StartGameAsync()
@@ -128,6 +128,7 @@ namespace MonopolyClient
             };
             await SendMessageAsync(rollMessage);
         }
+
         public void Disconnect()
         {
             _stream.Close();
