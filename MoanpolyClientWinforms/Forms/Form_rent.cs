@@ -17,16 +17,29 @@ namespace MonapolClientUI.Forms
             InitializeComponent();
             _client = client;
             _space = space;
+
+            textBox_nameOfProperty.Text = _space.Name;
+            textBox_rentMoney.Text = _space.RentPrice.ToString();
         }
 
-        private async void btnOK_Click(object sender, EventArgs e)
+        private void btnOK_Click(object sender, EventArgs e)
         {
-            await _client.SendMessageAsync(new GameMessage
+            //await _client.SendMessageAsync(new GameMessage
+            //{
+            //    Type = "PayRent",
+            //    Data = JsonSerializer.SerializeToElement(new
+            //    {
+            //        PropertyName = _space.Name,
+            //        RentPrice = _space.RentPrice
+            //    })
+            //});
+            _client.SendMessageAsync(new GameMessage
             {
-                Type = "RentProperty",
+                Type = "PayRent",
                 Data = JsonSerializer.SerializeToElement(new
                 {
-                    PropertyName = _space.Name
+                    PropertyName = _space.Name,
+                    RentPrice = _space.RentPrice
                 })
             });
             this.Close();

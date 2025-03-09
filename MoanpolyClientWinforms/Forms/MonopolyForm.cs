@@ -9,7 +9,6 @@ namespace MoanpolyClientWinforms
     public partial class MonopolyForm: Form
     {
         private GameClient _client;
-        //private Form_buy buyForm = null;
         private bool _buyFormOpenedThisTurn = false;
 
         public MonopolyForm()
@@ -42,7 +41,14 @@ namespace MoanpolyClientWinforms
                         var player = _client.Players.FirstOrDefault(p => p.Id == _client.MyPlayerId);
                         var currentSpace = _client.BoardSpaces[player.Position];
 
-                        if (!currentSpace.IsOwned && !currentSpace.IsSpecial && player.Money >= currentSpace.PurchasePrice)
+                        if (currentSpace.IsOwned && currentSpace.OwnedByPlayerId != player.Id)
+                        {
+                            using (Form_rent rentForm = new Form_rent(_client, currentSpace))
+                            {
+                                rentForm.ShowDialog();
+                            }
+                        }
+                        else if (!currentSpace.IsOwned && !currentSpace.IsSpecial && player.Money >= currentSpace.PurchasePrice)
                         {
                             _buyFormOpenedThisTurn = true; // הגדרת החלון כנפתח עבור התור הנוכחי
                             using (Form_buy buyForm = new Form_buy(_client, currentSpace))
@@ -51,7 +57,6 @@ namespace MoanpolyClientWinforms
                             }
                         }
                     }
-
                     WriteToLogger(isMyTurn ? "It's your turn!" : "Waiting for other players...");
                 }));
             };
