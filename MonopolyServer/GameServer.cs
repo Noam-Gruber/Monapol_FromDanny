@@ -41,6 +41,9 @@ namespace MonopolyServer
                 case "BuyProperty":
                     HandleBuyProperty(clientId, msg.Data);
                     break;
+                case "PayRent":
+                    HandlePayRent(clientId, msg.Data);
+                    break;
                 case "EndGame":
                     HandleEndGame(clientId);
                     break;
@@ -103,6 +106,7 @@ namespace MonopolyServer
                 owner.Money += space.RentPrice;
 
                 Console.WriteLine($"{currentPlayer.Name} paid ${space.RentPrice} to {owner.Name} for landing on {space.Name}.");
+                BroadcastGameState();
             }
 
             // עדכון מיקום השחקן בלוח
@@ -130,6 +134,27 @@ namespace MonopolyServer
             else
             {
                 Console.WriteLine($"{player.Name} can't buy {propertyName}");
+            }
+        }
+
+        private void HandlePayRent(string clientId, JsonElement data)
+        {
+            string propertyName = data.GetProperty("PropertyName").GetString();
+            int rentPrice = data.GetProperty("RentPrice").GetInt32();
+
+            var player = _gameState.Players.First(p => p.Id == clientId);
+            var space = _board.Spaces.First(s => s.Name == propertyName);
+
+            if (space != null && space.IsOwned && space.OwnedByPlayerId != clientId)
+            {
+                player.Money -= rentPrice;
+
+                var owner = _gameState.Players.First(p => p.Id == space.OwnedByPlayerId);
+                owner.Money += rentPrice;
+
+                Console.WriteLine($"{player.Name} paid rent ${rentPrice} to {owner.Name} for {space.Name}");
+
+                BroadcastGameState();
             }
         }
 
