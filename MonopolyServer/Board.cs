@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MonopolyServer
+﻿namespace MonopolyServer
 {
     public class Board
     {
@@ -13,7 +7,6 @@ namespace MonopolyServer
 
         public Board()
         {
-            // אתחול של המילון PlayerPositions
             PlayerPositions = new Dictionary<string, int>();
 
             Spaces = new List<BoardSpace>();

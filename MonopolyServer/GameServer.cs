@@ -38,6 +38,9 @@ namespace MonopolyServer
                 case "RollDice":
                     HandleRollDice(clientId);
                     break;
+                case "EndGame":
+                    HandleEndGame(clientId);
+                    break;
                 default:
                     Console.WriteLine($"Unknown message type: {msg.Type}");
                     break;
@@ -86,13 +89,30 @@ namespace MonopolyServer
             Random rnd = new Random();
             int diceRoll = rnd.Next(1, 7) + rnd.Next(1, 7);
             currentPlayer.Position = (currentPlayer.Position + diceRoll) % 40;
-
+            currentPlayer.CurrentProperty = _board.Spaces[currentPlayer.Position].Name;
             // עדכון מיקום השחקן בלוח
             _board.UpdatePlayerPosition(clientId, currentPlayer.Position);
             Console.WriteLine($"{currentPlayer.Name} rolled {diceRoll} and moved to {currentPlayer.Position}");
 
             _gameState.CurrentPlayerIndex = (_gameState.CurrentPlayerIndex + 1) % _gameState.Players.Count;
             BroadcastGameState();
+        }
+
+        private void HandleEndGame(string clientId)
+        {
+            if (!_isGameStarted)
+            {
+                Console.WriteLine("Game hasn't started yet.");
+                return;
+            }
+
+            _isGameStarted = false;
+
+            // חישוב המנצח (לדוגמה, השחקן עם הכי הרבה כסף)
+            var winner = _gameState.Players.OrderByDescending(p => p.Money).FirstOrDefault();
+
+            // שליחת הודעת סיום המשחק לכל הלקוחות
+            BroadcastEndGame(winner);
         }
 
         public async Task StartAsync()
@@ -110,7 +130,7 @@ namespace MonopolyServer
         private async Task HandleJoinGame(string clientId, JsonElement data)
         {
             string playerName = data.GetProperty("Name").GetString();
-            var player = new Player { Id = clientId, Name = playerName, Position = 0 };
+            var player = new Player { Id = clientId, Name = playerName, Position = 0 , CurrentProperty = _board.Spaces[0].Name };
             _gameState.Players.Add(player);
 
             // שליחת הודעה לשחקן שהצטרף עם ה-Id שלו ושמו
@@ -245,6 +265,33 @@ namespace MonopolyServer
                     }
                 }
             }
+        }
+
+        private async void BroadcastEndGame(Player winner)
+        {
+            var endGameMessage = new GameMessage
+            {
+                Type = "GameEnded",
+                Data = JsonSerializer.SerializeToElement(new
+                {
+                    WinnerId = winner.Id,
+                    WinnerName = winner.Name,
+                    WinnerMoney = winner.Money
+                })
+            };
+
+            string json = JsonSerializer.Serialize(endGameMessage);
+            byte[] data = Encoding.UTF8.GetBytes(json);
+
+            foreach (var client in _clients.Values)
+            {
+                if (client.Connected)
+                {
+                    await client.GetStream().WriteAsync(data, 0, data.Length);
+                }
+            }
+
+            Console.WriteLine($"Game ended! Winner is {winner.Name}");
         }
 
         public void Stop()
