@@ -9,6 +9,8 @@
         public bool IsSpecial { get; set; }
         public bool IsOwned => OwnedByPlayerId != null;
         public string OwnedByPlayerId { get; set; }
+        public bool IsChance { get; set; } = false;
+        public bool IsCommunityChest { get; set; } = false;
 
         public BoardSpace(int position, string name, int purchasePrice, int rentPrice, bool isSpecial = false)
         {

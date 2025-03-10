@@ -3,6 +3,7 @@ using System.Linq;
 using MonopolyClient;
 using System.Windows.Forms;
 using MonapolClientUI.Forms;
+using System.Drawing;
 
 namespace MoanpolyClientWinforms
 {
@@ -133,25 +134,32 @@ namespace MoanpolyClientWinforms
         {
             if (_client != null && _client.Players != null && _client.BoardSpaces != null)
             {
-                lstPlayerPositions.Items.Clear();
-                lstPlayerProperties.Items.Clear();
+                // נניח שהחלפת את ה-ListBox ל-RichTextBox בשם rtbPlayerPositions
+                rtbPlayerPositions.Clear();
+                rtbPlayerProperties.Clear();
 
                 foreach (var player in _client.Players)
                 {
+                    string playerName = player.Name;
                     string position = _client.GetPlayerPositionDisplay(player.Id);
-                    lstPlayerPositions.Items.Add($"{player.Name}: {position}");
+
+                    // הדגשת שם השחקן במודגש
+                    rtbPlayerPositions.SelectionFont = new Font(rtbPlayerPositions.Font, FontStyle.Bold);
+                    rtbPlayerPositions.AppendText($"{playerName}: ");
+
+                    rtbPlayerPositions.SelectionFont = new Font(rtbPlayerPositions.Font, FontStyle.Regular);
+                    rtbPlayerPositions.AppendText($"{position}\n");
 
                     var propertiesOwned = player.OwnedProperties;
+                    string propertyList = propertiesOwned.Any() ? string.Join(", ", propertiesOwned) : "No properties";
 
-                    string propertyList = propertiesOwned.Any()
-                        ? string.Join(", ", propertiesOwned)
-                        : "No properties";
+                    // הדגשת שם השחקן גם ברשימת הנכסים
+                    rtbPlayerProperties.SelectionFont = new Font(rtbPlayerProperties.Font, FontStyle.Bold);
+                    rtbPlayerProperties.AppendText($"{playerName}: ");
 
-                    lstPlayerProperties.Items.Add($"{player.Name}: {propertyList}");
+                    rtbPlayerProperties.SelectionFont = new Font(rtbPlayerProperties.Font, FontStyle.Regular);
+                    rtbPlayerProperties.AppendText($"{propertyList}\n");
                 }
-
-                btnConnect.Text = "Connected";
-                btnConnect.Enabled = false;
             }
             else
             {
@@ -166,6 +174,5 @@ namespace MoanpolyClientWinforms
             richTextBoxMessages.SelectionStart = richTextBoxMessages.Text.Length;
             richTextBoxMessages.ScrollToCaret();
         }
-
     }
 }

@@ -86,6 +86,12 @@
     <Compile Include="Forms\Form_buy.Designer.cs">
       <DependentUpon>Form_buy.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Form_Card.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Form_Card.Designer.cs">
+      <DependentUpon>Form_Card.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\Form_rent.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -103,6 +109,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Forms\Form_buy.resx">
       <DependentUpon>Form_buy.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Form_Card.resx">
+      <DependentUpon>Form_Card.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Form_rent.resx">
       <DependentUpon>Form_rent.cs</DependentUpon>

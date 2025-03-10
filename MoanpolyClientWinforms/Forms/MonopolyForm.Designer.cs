@@ -35,12 +35,12 @@
             this.btnConnect = new System.Windows.Forms.Button();
             this.btnJoinGame = new System.Windows.Forms.Button();
             this.btnStartGame = new System.Windows.Forms.Button();
-            this.lstPlayerPositions = new System.Windows.Forms.ListBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.richTextBoxMessages = new System.Windows.Forms.RichTextBox();
             this.btnEndGame = new System.Windows.Forms.Button();
-            this.lstPlayerProperties = new System.Windows.Forms.ListBox();
+            this.rtbPlayerPositions = new System.Windows.Forms.RichTextBox();
+            this.rtbPlayerProperties = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -110,15 +110,6 @@
             this.btnStartGame.UseVisualStyleBackColor = true;
             this.btnStartGame.Click += new System.EventHandler(this.btnStartGame_Click);
             // 
-            // lstPlayerPositions
-            // 
-            this.lstPlayerPositions.FormattingEnabled = true;
-            this.lstPlayerPositions.Location = new System.Drawing.Point(920, 60);
-            this.lstPlayerPositions.Margin = new System.Windows.Forms.Padding(2);
-            this.lstPlayerPositions.Name = "lstPlayerPositions";
-            this.lstPlayerPositions.Size = new System.Drawing.Size(230, 251);
-            this.lstPlayerPositions.TabIndex = 7;
-            // 
             // pictureBox1
             // 
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
@@ -167,27 +158,33 @@
             this.btnEndGame.UseVisualStyleBackColor = true;
             this.btnEndGame.Click += new System.EventHandler(this.btnEndGame_Click);
             // 
-            // lstPlayerProperties
+            // rtbPlayerPositions
             // 
-            this.lstPlayerProperties.FormattingEnabled = true;
-            this.lstPlayerProperties.HorizontalScrollbar = true;
-            this.lstPlayerProperties.Location = new System.Drawing.Point(920, 330);
-            this.lstPlayerProperties.Name = "lstPlayerProperties";
-            this.lstPlayerProperties.ScrollAlwaysVisible = true;
-            this.lstPlayerProperties.Size = new System.Drawing.Size(229, 225);
-            this.lstPlayerProperties.TabIndex = 18;
+            this.rtbPlayerPositions.Location = new System.Drawing.Point(920, 60);
+            this.rtbPlayerPositions.Name = "rtbPlayerPositions";
+            this.rtbPlayerPositions.Size = new System.Drawing.Size(229, 264);
+            this.rtbPlayerPositions.TabIndex = 19;
+            this.rtbPlayerPositions.Text = "";
+            // 
+            // rtbPlayerProperties
+            // 
+            this.rtbPlayerProperties.Location = new System.Drawing.Point(920, 340);
+            this.rtbPlayerProperties.Name = "rtbPlayerProperties";
+            this.rtbPlayerProperties.Size = new System.Drawing.Size(229, 246);
+            this.rtbPlayerProperties.TabIndex = 20;
+            this.rtbPlayerProperties.Text = "";
             // 
             // MonopolyForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1161, 692);
-            this.Controls.Add(this.lstPlayerProperties);
+            this.Controls.Add(this.rtbPlayerProperties);
+            this.Controls.Add(this.rtbPlayerPositions);
             this.Controls.Add(this.btnEndGame);
             this.Controls.Add(this.richTextBoxMessages);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
-            this.Controls.Add(this.lstPlayerPositions);
             this.Controls.Add(this.btnConnect);
             this.Controls.Add(this.btnRollDice);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -208,12 +205,12 @@
         private System.Windows.Forms.Button btnConnect;
         private System.Windows.Forms.Button btnJoinGame;
         private System.Windows.Forms.Button btnStartGame;
-        private System.Windows.Forms.ListBox lstPlayerPositions;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.RichTextBox richTextBoxMessages;
         private System.Windows.Forms.Button btnEndGame;
-        private System.Windows.Forms.ListBox lstPlayerProperties;
+        private System.Windows.Forms.RichTextBox rtbPlayerPositions;
+        private System.Windows.Forms.RichTextBox rtbPlayerProperties;
     }
 }
 

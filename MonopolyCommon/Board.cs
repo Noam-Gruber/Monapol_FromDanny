@@ -16,12 +16,12 @@ namespace MonopolyServer
             // יצירת שטחים עם מחירים ושמות - כאן נממש את השטחים הרגילים והמיוחדים
             Spaces.Add(new BoardSpace(0, "Go", 0, 0, true));  // דוגמת שטח מיוחד
             Spaces.Add(new BoardSpace(1, "Mediterranean Avenue", 60, 2));
-            Spaces.Add(new BoardSpace(2, "Community Chest", 0, 0, true));  // שטח מיוחד
+            Spaces.Add(new BoardSpace(2, "Community Chest", 0, 0, true) { IsCommunityChest = true });  // שטח מיוחד
             Spaces.Add(new BoardSpace(3, "Baltic Avenue", 60, 4));
             Spaces.Add(new BoardSpace(4, "Income Tax", 0, 0, true));  // שטח מיוחד
             Spaces.Add(new BoardSpace(5, "Reading Railroad", 200, 25));
             Spaces.Add(new BoardSpace(6, "Oriental Avenue", 100, 6));
-            Spaces.Add(new BoardSpace(7, "Chance", 0, 0, true));  // שטח מיוחד
+            Spaces.Add(new BoardSpace(7, "Chance", 0, 0, true) { IsChance = true });  // שטח מיוחד
             Spaces.Add(new BoardSpace(8, "Vermont Avenue", 100, 6));
             Spaces.Add(new BoardSpace(9, "Connecticut Avenue", 120, 8));
             Spaces.Add(new BoardSpace(10, "Jail", 0, 0, true));  // שטח מיוחד
@@ -31,12 +31,12 @@ namespace MonopolyServer
             Spaces.Add(new BoardSpace(14, "Virginia Avenue", 160, 12));
             Spaces.Add(new BoardSpace(15,"States Railroad", 200, 25));
             Spaces.Add(new BoardSpace(16, "St. James Place", 180, 14));
-            Spaces.Add(new BoardSpace(17, "Community Chest", 0, 0, true));  // שטח מיוחד
+            Spaces.Add(new BoardSpace(17, "Community Chest", 0, 0, true) { IsCommunityChest = true });  // שטח מיוחד
             Spaces.Add(new BoardSpace(18, "Tennessee Avenue", 180, 14));
             Spaces.Add(new BoardSpace(19, "New York Avenue", 200, 16));
             Spaces.Add(new BoardSpace(20, "Free Parking", 0, 0, true));  // שטח מיוחד
             Spaces.Add(new BoardSpace(21, "Kentucky Avenue", 220, 18));
-            Spaces.Add(new BoardSpace(22, "Chance", 0, 0, true));  // שטח מיוחד
+            Spaces.Add(new BoardSpace(22, "Chance", 0, 0, true) { IsChance = true });  // שטח מיוחד
             Spaces.Add(new BoardSpace(23, "Indiana Avenue", 220, 18));
             Spaces.Add(new BoardSpace(24, "Illinois Avenue", 240, 20));
             Spaces.Add(new BoardSpace(25, "B&O Railroad", 200, 25));
@@ -47,7 +47,7 @@ namespace MonopolyServer
             Spaces.Add(new BoardSpace(30, "Go to Jail", 0, 0, true));  // שטח מיוחד
             Spaces.Add(new BoardSpace(31, "Pacific Avenue", 300, 26));
             Spaces.Add(new BoardSpace(32, "North Carolina Avenue", 300, 26));
-            Spaces.Add(new BoardSpace(33, "Community Chest", 0, 0, true));  // שטח מיוחד
+            Spaces.Add(new BoardSpace(33, "Community Chest", 0, 0, true) { IsCommunityChest = true });  // שטח מיוחד
             Spaces.Add(new BoardSpace(34, "Pennsylvania Railroad", 200, 25));
             Spaces.Add(new BoardSpace(35, "Chestnut Street", 320, 28));
             Spaces.Add(new BoardSpace(36, "Marvin Gardens", 320, 28));

@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.IO;
 
 namespace MonopolyClient
 {
@@ -33,19 +34,29 @@ namespace MonopolyClient
 
         private async void StartListening()
         {
-            byte[] buffer = new byte[4096];
             try
             {
                 while (true)
                 {
-                    int byteCount = await _stream.ReadAsync(buffer, 0, buffer.Length);
-                    if (byteCount == 0)
+                    using (var memoryStream = new MemoryStream())
                     {
-                        MessageReceived?.Invoke("Disconnected from server.");
-                        break;
+                        byte[] buffer = new byte[8192]; // הגדלת ה-buffer
+                        int bytesRead;
+
+                        // קריאה רציפה עד שהזרם מסתיים
+                        while ((bytesRead = await _stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                        {
+                            memoryStream.Write(buffer, 0, bytesRead);
+
+                            // אם התקבל פחות מה-buffer המלא, סביר להניח שסיימנו
+                            if (bytesRead < buffer.Length)
+                                break;
+                        }
+
+                        string message = Encoding.UTF8.GetString(memoryStream.ToArray());
+                        Console.WriteLine($"DEBUG: Received message: {message}"); // הדפסת ההודעה המלאה
+                        HandleMessage(message);
                     }
-                    string message = Encoding.UTF8.GetString(buffer, 0, byteCount);
-                    HandleMessage(message);
                 }
             }
             catch (Exception ex)
@@ -53,6 +64,7 @@ namespace MonopolyClient
                 MessageReceived?.Invoke($"Error receiving data: {ex.Message}");
             }
         }
+
 
         private void HandleMessage(string messageJson)
         {
