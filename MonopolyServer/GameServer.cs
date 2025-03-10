@@ -76,7 +76,6 @@ namespace MonopolyServer
             }
         }
 
-
         private void HandleRollDice(string clientId)
         {
             if (!_isGameStarted)
@@ -126,7 +125,18 @@ namespace MonopolyServer
             if (space != null && !space.IsOwned && player.Money >= space.PurchasePrice)
             {
                 player.Money -= space.PurchasePrice;
-                space.OwnedByPlayerId = clientId; // רק זה דרוש
+                space.OwnedByPlayerId = clientId;
+                player.OwnedProperties.Add(space.Name);
+
+                // ודא שהנכס באמת מתווסף לרשימת הנכסים של השחקן
+                if (!player.OwnedProperties.Contains(space.Name))
+                    player.OwnedProperties.Add(space.Name);
+
+                foreach (var prop in player.OwnedProperties)
+                {
+                    Console.WriteLine($"DEBUG: {player.Name} owns {prop}");
+                }
+
                 Console.WriteLine($"{player.Name} bought {space.Name} for ${space.PurchasePrice}");
 
                 BroadcastGameState();
@@ -157,7 +167,6 @@ namespace MonopolyServer
                 BroadcastGameState();
             }
         }
-
 
         private void HandleEndGame(string clientId)
         {
