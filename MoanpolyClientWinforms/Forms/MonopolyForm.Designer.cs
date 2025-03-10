@@ -40,6 +40,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.richTextBoxMessages = new System.Windows.Forms.RichTextBox();
             this.btnEndGame = new System.Windows.Forms.Button();
+            this.lstPlayerProperties = new System.Windows.Forms.ListBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -166,11 +167,22 @@
             this.btnEndGame.UseVisualStyleBackColor = true;
             this.btnEndGame.Click += new System.EventHandler(this.btnEndGame_Click);
             // 
+            // lstPlayerProperties
+            // 
+            this.lstPlayerProperties.FormattingEnabled = true;
+            this.lstPlayerProperties.HorizontalScrollbar = true;
+            this.lstPlayerProperties.Location = new System.Drawing.Point(920, 330);
+            this.lstPlayerProperties.Name = "lstPlayerProperties";
+            this.lstPlayerProperties.ScrollAlwaysVisible = true;
+            this.lstPlayerProperties.Size = new System.Drawing.Size(229, 225);
+            this.lstPlayerProperties.TabIndex = 18;
+            // 
             // MonopolyForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1161, 692);
+            this.Controls.Add(this.lstPlayerProperties);
             this.Controls.Add(this.btnEndGame);
             this.Controls.Add(this.richTextBoxMessages);
             this.Controls.Add(this.groupBox1);
@@ -201,6 +213,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.RichTextBox richTextBoxMessages;
         private System.Windows.Forms.Button btnEndGame;
+        private System.Windows.Forms.ListBox lstPlayerProperties;
     }
 }
 

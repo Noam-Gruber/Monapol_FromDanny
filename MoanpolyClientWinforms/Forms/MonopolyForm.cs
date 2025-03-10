@@ -66,6 +66,7 @@ namespace MoanpolyClientWinforms
                 Invoke(new Action(() =>
                 {
                     UpdatePlayerPositionsDisplay();
+                    //UpdatePlayerPropertiesDisplay();
                 }));
             };
 
@@ -130,14 +131,25 @@ namespace MoanpolyClientWinforms
 
         private void UpdatePlayerPositionsDisplay()
         {
-            if (_client != null && _client.Players != null)
+            if (_client != null && _client.Players != null && _client.BoardSpaces != null)
             {
                 lstPlayerPositions.Items.Clear();
+                lstPlayerProperties.Items.Clear();
+
                 foreach (var player in _client.Players)
                 {
-                    string position = _client.GetPlayerPositionDisplay(player.Id);  // קריאה לפונקציה
-                    lstPlayerPositions.Items.Add($"{player.Name}: {position}");  // עדכון ה-UI עם המיקום
+                    string position = _client.GetPlayerPositionDisplay(player.Id);
+                    lstPlayerPositions.Items.Add($"{player.Name}: {position}");
+
+                    var propertiesOwned = player.OwnedProperties;
+
+                    string propertyList = propertiesOwned.Any()
+                        ? string.Join(", ", propertiesOwned)
+                        : "No properties";
+
+                    lstPlayerProperties.Items.Add($"{player.Name}: {propertyList}");
                 }
+
                 btnConnect.Text = "Connected";
                 btnConnect.Enabled = false;
             }

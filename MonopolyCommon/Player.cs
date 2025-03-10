@@ -1,4 +1,6 @@
-﻿namespace MonopolyCommon
+﻿using System.Collections.Generic;
+
+namespace MonopolyCommon
 {
     public class Player
     {
@@ -7,5 +9,6 @@
         public int Position { get; set; }
         public int Money { get; set; } = 1500;
         public string CurrentProperty { get; set; }
+        public List<string> OwnedProperties { get; set; } = new List<string>();
     }
 }

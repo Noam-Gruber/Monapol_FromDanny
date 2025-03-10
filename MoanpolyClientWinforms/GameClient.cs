@@ -45,7 +45,6 @@ namespace MonopolyClient
                         break;
                     }
                     string message = Encoding.UTF8.GetString(buffer, 0, byteCount);
-
                     HandleMessage(message);
                 }
             }
@@ -58,7 +57,6 @@ namespace MonopolyClient
         private void HandleMessage(string messageJson)
         {
             var gameMessage = JsonSerializer.Deserialize<GameMessage>(messageJson);
-
             if (gameMessage == null) return;
 
             switch (gameMessage.Type)
@@ -75,6 +73,14 @@ namespace MonopolyClient
                     bool isMyTurn = Players[gameState.CurrentPlayerIndex].Id == _myPlayerId;
                     MyTurnUpdated?.Invoke(isMyTurn);
                     PlayersUpdated?.Invoke();
+
+                    // כאן להוסיף את השורות הבאות:
+                    foreach (var space in BoardSpaces)
+                    {
+                        if (space.IsOwned)
+                            Console.WriteLine($"DEBUG: Space {space.Name} owned by {space.OwnedByPlayerId}");
+                    }
+
                     break;
 
                 case "JoinGameSuccess":
@@ -156,15 +162,6 @@ namespace MonopolyClient
         {
             await SendMessageAsync(new GameMessage { Type = "EndGame", Data = JsonSerializer.SerializeToElement(new { }) });
         }
-        //public async Task EndGame()
-        //{
-        //    var endGameEndGame = new GameMessage
-        //    {
-        //        Type = "EndGame",
-        //        Data = JsonSerializer.SerializeToElement(new { })
-        //    };
-        //    await SendMessageAsync(endGameEndGame);
-        //}
 
         public void Disconnect()
         {
