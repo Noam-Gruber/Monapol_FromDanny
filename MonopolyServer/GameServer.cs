@@ -77,7 +77,7 @@ namespace MonopolyServer
             }
         }
 
-        private void HandleRollDice(string clientId)
+        private async void HandleRollDice(string clientId)
         {
             if (!_isGameStarted)
             {
@@ -114,12 +114,30 @@ namespace MonopolyServer
             }
             else if (space.IsOwned && space.OwnedByPlayerId != clientId)
             {
-                // 💸 תשלום שכירות
-                var owner = _gameState.Players.First(p => p.Id == space.OwnedByPlayerId);
-                currentPlayer.Money -= space.RentPrice;
-                owner.Money += space.RentPrice;
+                //// 💸 תשלום שכירות
+                //var owner = _gameState.Players.First(p => p.Id == space.OwnedByPlayerId);
+                //currentPlayer.Money -= space.RentPrice;
+                //owner.Money += space.RentPrice;
 
-                Console.WriteLine($"{currentPlayer.Name} paid ${space.RentPrice} to {owner.Name} for landing on {space.Name}.");
+                //Console.WriteLine($"{currentPlayer.Name} paid ${space.RentPrice} to {owner.Name} for landing on {space.Name}.");
+
+                // שליחת הודעה ללקוח כדי להציג את חלון השכירות
+                var owner = _gameState.Players.First(p => p.Id == space.OwnedByPlayerId);
+
+                // שליחת הודעה ללקוח כדי לפתוח את חלון השכירות
+                var rentMessage = new GameMessage
+                {
+                    Type = "ShowRentForm",
+                    Data = JsonSerializer.SerializeToElement(new
+                    {
+                        Property = space, // שולחים את האובייקט הקיים
+                        OwnerName = owner.Name
+                    })
+                };
+
+                string json = JsonSerializer.Serialize(rentMessage);
+                byte[] data = Encoding.UTF8.GetBytes(json);
+                await _clients[clientId].GetStream().WriteAsync(data, 0, data.Length);
             }
 
             // 🕹️ עדכון מיקום השחקן בלוח
@@ -128,6 +146,7 @@ namespace MonopolyServer
 
             // 🔄 מעבר לתור הבא
             _gameState.CurrentPlayerIndex = (_gameState.CurrentPlayerIndex + 1) % _gameState.Players.Count;
+            Console.WriteLine($"Next turn: {_gameState.Players[_gameState.CurrentPlayerIndex].Name}");
 
             // 📡 עדכון המצב ללקוחות
             BroadcastGameState();
@@ -285,68 +304,9 @@ namespace MonopolyServer
                     }
                 }
             }
+            // 📌 הוספנו הודעת לוג למעקב אחרי תור השחקן
+            Console.WriteLine($"Sent updated game state. Current turn: {_gameState.Players[_gameState.CurrentPlayerIndex].Name}");
         }
-
-        //// פונקציה בשרת ששולחת עדכון ללקוח על המיקום החדש של השחקן
-        //private void BroadcastPlayerPosition(string playerId)
-        //{
-        //    string positionInfo = _board.GetPlayerPositionDisplay(playerId);
-        //    var message = new GameMessage
-        //    {
-        //        Type = "PlayerPositionUpdate",
-        //        Data = JsonSerializer.SerializeToElement(new { PlayerId = playerId, Position = positionInfo })
-        //    };
-
-        //    string json = JsonSerializer.Serialize(message);
-        //    byte[] data = Encoding.UTF8.GetBytes(json);
-
-        //    // שליחה לכל הלקוחות
-        //    foreach (var kvp in _clients)
-        //    {
-        //        var client = kvp.Value;
-        //        if (client.Connected)
-        //        {
-        //            try
-        //            {
-        //                var stream = client.GetStream();
-        //                stream.WriteAsync(data, 0, data.Length);
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                Console.WriteLine($"Error sending to client {kvp.Key}: {ex.Message}");
-        //            }
-        //        }
-        //    }
-        //}
-
-        //private void BroadcastPlayerList()
-        //{
-        //    var gameMessage = new GameMessage
-        //    {
-        //        Type = "PlayerListUpdate",
-        //        Data = JsonSerializer.SerializeToElement(_gameState.Players)
-        //    };
-
-        //    string json = JsonSerializer.Serialize(gameMessage);
-        //    byte[] data = Encoding.UTF8.GetBytes(json);
-
-        //    foreach (var kvp in _clients)
-        //    {
-        //        var client = kvp.Value;
-        //        if (client.Connected)
-        //        {
-        //            try
-        //            {
-        //                var stream = client.GetStream();
-        //                stream.WriteAsync(data, 0, data.Length);
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                Console.WriteLine($"Error sending to client {kvp.Key}: {ex.Message}");
-        //            }
-        //        }
-        //    }
-        //}
 
         private async void BroadcastEndGame(Player winner)
         {
