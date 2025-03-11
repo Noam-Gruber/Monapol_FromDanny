@@ -41,6 +41,7 @@
             this.btnEndGame = new System.Windows.Forms.Button();
             this.rtbPlayerPositions = new System.Windows.Forms.RichTextBox();
             this.rtbPlayerProperties = new System.Windows.Forms.RichTextBox();
+            this.rtbPlayerMoney = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -162,23 +163,32 @@
             // 
             this.rtbPlayerPositions.Location = new System.Drawing.Point(920, 60);
             this.rtbPlayerPositions.Name = "rtbPlayerPositions";
-            this.rtbPlayerPositions.Size = new System.Drawing.Size(229, 264);
+            this.rtbPlayerPositions.Size = new System.Drawing.Size(229, 143);
             this.rtbPlayerPositions.TabIndex = 19;
             this.rtbPlayerPositions.Text = "";
             // 
             // rtbPlayerProperties
             // 
-            this.rtbPlayerProperties.Location = new System.Drawing.Point(920, 340);
+            this.rtbPlayerProperties.Location = new System.Drawing.Point(920, 390);
             this.rtbPlayerProperties.Name = "rtbPlayerProperties";
-            this.rtbPlayerProperties.Size = new System.Drawing.Size(229, 246);
+            this.rtbPlayerProperties.Size = new System.Drawing.Size(229, 196);
             this.rtbPlayerProperties.TabIndex = 20;
             this.rtbPlayerProperties.Text = "";
+            // 
+            // rtbPlayerMoney
+            // 
+            this.rtbPlayerMoney.Location = new System.Drawing.Point(921, 222);
+            this.rtbPlayerMoney.Name = "rtbPlayerMoney";
+            this.rtbPlayerMoney.Size = new System.Drawing.Size(229, 143);
+            this.rtbPlayerMoney.TabIndex = 21;
+            this.rtbPlayerMoney.Text = "";
             // 
             // MonopolyForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1161, 692);
+            this.Controls.Add(this.rtbPlayerMoney);
             this.Controls.Add(this.rtbPlayerProperties);
             this.Controls.Add(this.rtbPlayerPositions);
             this.Controls.Add(this.btnEndGame);
@@ -211,6 +221,7 @@
         private System.Windows.Forms.Button btnEndGame;
         private System.Windows.Forms.RichTextBox rtbPlayerPositions;
         private System.Windows.Forms.RichTextBox rtbPlayerProperties;
+        private System.Windows.Forms.RichTextBox rtbPlayerMoney;
     }
 }
 

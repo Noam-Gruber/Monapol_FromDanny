@@ -137,6 +137,7 @@ namespace MoanpolyClientWinforms
                 // נניח שהחלפת את ה-ListBox ל-RichTextBox בשם rtbPlayerPositions
                 rtbPlayerPositions.Clear();
                 rtbPlayerProperties.Clear();
+                rtbPlayerMoney.Clear();
 
                 foreach (var player in _client.Players)
                 {
@@ -151,6 +152,7 @@ namespace MoanpolyClientWinforms
                     rtbPlayerPositions.AppendText($"{position}\n");
 
                     var propertiesOwned = player.OwnedProperties;
+                    var MoneyOwned = player.Money;
                     string propertyList = propertiesOwned.Any() ? string.Join(", ", propertiesOwned) : "No properties";
 
                     // הדגשת שם השחקן גם ברשימת הנכסים
@@ -159,6 +161,13 @@ namespace MoanpolyClientWinforms
 
                     rtbPlayerProperties.SelectionFont = new Font(rtbPlayerProperties.Font, FontStyle.Regular);
                     rtbPlayerProperties.AppendText($"{propertyList}\n");
+
+                    // הדגשת שם השחקן גם ברשימת הכספים
+                    rtbPlayerMoney.SelectionFont = new Font(rtbPlayerProperties.Font, FontStyle.Bold);
+                    rtbPlayerMoney.AppendText($"{playerName}: ");
+
+                    rtbPlayerMoney.SelectionFont = new Font(rtbPlayerProperties.Font, FontStyle.Regular);
+                    rtbPlayerMoney.AppendText($"{MoneyOwned}\n");
                 }
             }
             else

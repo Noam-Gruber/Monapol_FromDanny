@@ -8867,6 +8867,9 @@
         N/8A8g+5/wCuL/8AoJqaob//AJB9z/1xf/0E1M/hYmf/2Q==
 </value>
   </data>
+  <metadata name="richTextBoxMessages.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
   <data name="btnEndGame.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAAmRJREFUWEft
