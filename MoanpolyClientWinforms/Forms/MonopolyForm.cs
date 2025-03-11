@@ -36,7 +36,7 @@ namespace MoanpolyClientWinforms
                 {
                     btnRollDice.Enabled = isMyTurn && !btnStartGame.Enabled;
                     btnEndGame.Enabled = !btnStartGame.Enabled;
-
+                    WriteToLogger(isMyTurn ? "It's your turn!" : "Waiting for other players...");
                     if (isMyTurn && !_buyFormOpenedThisTurn)
                     {
                         var player = _client.Players.FirstOrDefault(p => p.Id == _client.MyPlayerId);
@@ -44,7 +44,8 @@ namespace MoanpolyClientWinforms
 
                         if (currentSpace.IsOwned && currentSpace.OwnedByPlayerId != player.Id)
                         {
-                            using (Form_rent rentForm = new Form_rent(_client, currentSpace))
+                            var owner = _client.Players.FirstOrDefault(p => p.Id == currentSpace.OwnedByPlayerId);
+                            using (Form_rent rentForm = new Form_rent(_client, currentSpace, currentSpace.RentPrice, owner?.Name ?? "Unknown"))
                             {
                                 rentForm.ShowDialog();
                             }

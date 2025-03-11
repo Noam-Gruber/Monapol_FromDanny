@@ -8,6 +8,9 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
+using MonapolClientUI.Forms;
+using MoanpolyClientWinforms;
+using System.Windows.Forms;
 
 namespace MonopolyClient
 {
@@ -85,13 +88,14 @@ namespace MonopolyClient
                     bool isMyTurn = Players[gameState.CurrentPlayerIndex].Id == _myPlayerId;
                     MyTurnUpdated?.Invoke(isMyTurn);
                     PlayersUpdated?.Invoke();
+                    Console.WriteLine($"DEBUG: Current player is {Players[gameState.CurrentPlayerIndex].Name}");
 
-                    // כאן להוסיף את השורות הבאות:
-                    foreach (var space in BoardSpaces)
-                    {
-                        if (space.IsOwned)
-                            Console.WriteLine($"DEBUG: Space {space.Name} owned by {space.OwnedByPlayerId}");
-                    }
+                    //// כאן להוסיף את השורות הבאות:
+                    //foreach (var space in BoardSpaces)
+                    //{
+                    //    if (space.IsOwned)
+                    //        Console.WriteLine($"DEBUG: Space {space.Name} owned by {space.OwnedByPlayerId}");
+                    //}
 
                     break;
 
@@ -106,6 +110,26 @@ namespace MonopolyClient
                     int winnerMoney = gameMessage.Data.GetProperty("WinnerMoney").GetInt32();
                     string endGameMessage = $"Game Ended! Winner: {winnerName}, Money: ${winnerMoney}";
                     GameEnded?.Invoke(endGameMessage);
+                    break;
+
+                case "ShowRentForm":
+                    var rentData = JsonSerializer.Deserialize<JsonElement>(gameMessage.Data.ToString());
+                    var space = JsonSerializer.Deserialize<BoardSpace>(rentData.GetProperty("Property").ToString());
+                    string ownerName = rentData.GetProperty("OwnerName").GetString();
+
+                    if (space != null)
+                    {
+                        if (Application.OpenForms["MonopolyForm"] is MonopolyForm mainForm)
+                        {
+                            mainForm.Invoke(new Action(() =>
+                            {
+                                using (Form_rent rentForm = new Form_rent(this, space, space.RentPrice, ownerName))
+                                {
+                                    rentForm.ShowDialog();
+                                }
+                            }));
+                        }
+                    }
                     break;
             }
         }
