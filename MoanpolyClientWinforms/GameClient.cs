@@ -11,6 +11,7 @@ using System.IO;
 using MonapolClientUI.Forms;
 using MoanpolyClientWinforms;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 
 namespace MonopolyClient
 {
@@ -71,18 +72,18 @@ namespace MonopolyClient
 
         private void HandleMessage(string messageJson)
         {
-            var gameMessage = JsonSerializer.Deserialize<GameMessage>(messageJson);
+            var gameMessage = System.Text.Json.JsonSerializer.Deserialize<GameMessage>(messageJson);
             if (gameMessage == null) return;
 
             switch (gameMessage.Type)
             {
                 case "PlayerListUpdate":
-                    Players = JsonSerializer.Deserialize<List<Player>>(gameMessage.Data.ToString());
+                    Players = System.Text.Json.JsonSerializer.Deserialize<List<Player>>(gameMessage.Data.ToString());
                     PlayersUpdated?.Invoke();
                     break;
 
                 case "GameStateUpdate":
-                    var gameState = JsonSerializer.Deserialize<GameState>(gameMessage.Data.ToString());
+                    var gameState = System.Text.Json.JsonSerializer.Deserialize<GameState>(gameMessage.Data.ToString());
                     Players = gameState.Players;
                     BoardSpaces = gameState.Board.Spaces;
                     bool isMyTurn = Players[gameState.CurrentPlayerIndex].Id == _myPlayerId;
@@ -100,7 +101,7 @@ namespace MonopolyClient
                     break;
 
                 case "JoinGameSuccess":
-                    var player = JsonSerializer.Deserialize<Player>(gameMessage.Data.ToString());
+                    var player = System.Text.Json.JsonSerializer.Deserialize<Player>(gameMessage.Data.ToString());
                     _myPlayerId = player.Id;
                     MessageReceived?.Invoke($"You joined successfully. Your ID is {_myPlayerId}.");
                     break;
@@ -113,8 +114,8 @@ namespace MonopolyClient
                     break;
 
                 case "ShowRentForm":
-                    var rentData = JsonSerializer.Deserialize<JsonElement>(gameMessage.Data.ToString());
-                    var space = JsonSerializer.Deserialize<BoardSpace>(rentData.GetProperty("Property").ToString());
+                    var rentData = System.Text.Json.JsonSerializer.Deserialize<JsonElement>(gameMessage.Data.ToString());
+                    var space = System.Text.Json.JsonSerializer.Deserialize<BoardSpace>(rentData.GetProperty("Property").ToString());
                     string ownerName = rentData.GetProperty("OwnerName").GetString();
 
                     if (space != null)
@@ -154,7 +155,7 @@ namespace MonopolyClient
 
         public async Task SendMessageAsync(GameMessage message)
         {
-            string json = JsonSerializer.Serialize(message);
+            string json = System.Text.Json.JsonSerializer.Serialize(message);
             byte[] data = Encoding.UTF8.GetBytes(json);
             await _stream.WriteAsync(data, 0, data.Length);
         }
@@ -164,7 +165,7 @@ namespace MonopolyClient
             var joinMessage = new GameMessage
             {
                 Type = "JoinGame",
-                Data = JsonSerializer.SerializeToElement(new { Name = playerName })
+                Data = System.Text.Json.JsonSerializer.SerializeToElement(new { Name = playerName })
             };
             await SendMessageAsync(joinMessage);
 
@@ -179,7 +180,7 @@ namespace MonopolyClient
             var startMessage = new GameMessage
             {
                 Type = "StartGame",
-                Data = JsonSerializer.SerializeToElement(new { })
+                Data = System.Text.Json.JsonSerializer.SerializeToElement(new { })
             };
             await SendMessageAsync(startMessage);
         }
@@ -189,14 +190,14 @@ namespace MonopolyClient
             var rollMessage = new GameMessage
             {
                 Type = "RollDice",
-                Data = JsonSerializer.SerializeToElement(new { })
+                Data = System.Text.Json.JsonSerializer.SerializeToElement(new { })
             };
             await SendMessageAsync(rollMessage);
         }
 
         public async Task EndGame()
         {
-            await SendMessageAsync(new GameMessage { Type = "EndGame", Data = JsonSerializer.SerializeToElement(new { }) });
+            await SendMessageAsync(new GameMessage { Type = "EndGame", Data = System.Text.Json.JsonSerializer.SerializeToElement(new { }) });
         }
 
         public void Disconnect()

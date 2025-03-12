@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BB935CE0-25F1-403A-B548-E87DBC650858}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
-    <RootNamespace>MoanpolyClientWinforms</RootNamespace>
-    <AssemblyName>MoanpolyClientWinforms</AssemblyName>
+    <ProjectGuid>{15C8C70B-67E4-45C5-BBA5-86E749C3D19C}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MonopolyServer</RootNamespace>
+    <AssemblyName>MonopolyServer</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -35,9 +35,6 @@
   <ItemGroup>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=9.0.0.3, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.9.0.3\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -73,92 +70,24 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Forms\Form_buy.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Form_buy.Designer.cs">
-      <DependentUpon>Form_buy.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Form_Card.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Form_Card.Designer.cs">
-      <DependentUpon>Form_Card.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Form_rent.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Form_rent.Designer.cs">
-      <DependentUpon>Form_rent.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GameClient.cs" />
-    <Compile Include="Forms\MonopolyForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\MonopolyForm.Designer.cs">
-      <DependentUpon>MonopolyForm.cs</DependentUpon>
-    </Compile>
+    <Compile Include="CardManager.cs" />
+    <Compile Include="GameServer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Forms\Form_buy.resx">
-      <DependentUpon>Form_buy.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Form_Card.resx">
-      <DependentUpon>Form_Card.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Form_rent.resx">
-      <DependentUpon>Form_rent.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MonopolyForm.resx">
-      <DependentUpon>MonopolyForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MonopolyCommon\MonopolyCommon.csproj">
       <Project>{e567fc24-000a-4b9a-88b4-2fd6212712f9}</Project>
       <Name>MonopolyCommon</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <Content Include="Images\board-game.ico" />
-    <Content Include="Images\board.jpg" />
-    <Content Include="Images\buy_icon.ico" />
-    <Content Include="Images\dices_32x32.png" />
-    <Content Include="Images\game.png" />
-    <Content Include="Images\grocery-store.png" />
-    <Content Include="Images\house.png" />
-    <Content Include="Images\rent_icon.ico" />
-    <Content Include="Images\video.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
