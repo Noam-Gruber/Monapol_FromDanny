@@ -1,13 +1,14 @@
-﻿using System.Net;
+﻿using System;
+using System.IO;
+using System.Net;
 using System.Text;
+using System.Linq;
 using MonopolyCommon;
 using System.Text.Json;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System;
-using System.Linq;
 
 namespace MonopolyServer
 {
@@ -19,7 +20,7 @@ namespace MonopolyServer
         private readonly Board _board = new Board();
 
         private bool _isGameStarted = false;
-        private HashSet<string> _playersReady = new HashSet<string>(); // שחקנים שמוכנים להתחיל
+        private HashSet<string> _playersReady = new HashSet<string>();
         private CardManager _cardManager = new CardManager();
 
         public GameServer(int port)
@@ -27,7 +28,7 @@ namespace MonopolyServer
             _listener = new TcpListener(IPAddress.Any, port);
         }
 
-        private void ProcessMessage(string clientId, string messageJson)
+        private async void ProcessMessage(string clientId, string messageJson)
         {
             var msg = JsonSerializer.Deserialize<GameMessage>(messageJson);
             if (msg == null) return;
@@ -35,13 +36,13 @@ namespace MonopolyServer
             switch (msg.Type)
             {
                 case "JoinGame":
-                    HandleJoinGame(clientId, msg.Data);
+                    await HandleJoinGame(clientId, msg.Data);
                     break;
                 case "StartGame":
                     HandleStartGame(clientId);
                     break;
                 case "RollDice":
-                    HandleRollDice(clientId);
+                    await HandleRollDice(clientId);
                     break;
                 case "BuyProperty":
                     HandleBuyProperty(clientId, msg.Data);
@@ -73,7 +74,7 @@ namespace MonopolyServer
                 _isGameStarted = true;
                 _gameState.CurrentPlayerIndex = 0;
                 Console.WriteLine("Game started immediately!");
-                BroadcastGameState();
+                _ = BroadcastGameState();
             }
             else
             {
@@ -81,20 +82,12 @@ namespace MonopolyServer
             }
         }
 
-        private async void HandleRollDice(string clientId)
+        private async Task HandleRollDice(string clientId)
         {
-            if (!_isGameStarted)
-            {
-                Console.WriteLine("The game hasn't started yet.");
-                return;
-            }
+            if (!_isGameStarted) return;
 
             var currentPlayer = _gameState.Players[_gameState.CurrentPlayerIndex];
-            if (currentPlayer.Id != clientId)
-            {
-                Console.WriteLine("It's not your turn.");
-                return;
-            }
+            if (currentPlayer.Id != clientId) return;
 
             Random rnd = new Random();
             int diceRoll = rnd.Next(1, 7) + rnd.Next(1, 7);
@@ -103,7 +96,9 @@ namespace MonopolyServer
 
             var space = _board.Spaces[currentPlayer.Position];
 
-            // 🎯 בדיקה אם המשבצת היא קלף Chance או Community Chest
+            _board.UpdatePlayerPosition(clientId, currentPlayer.Position);
+            Console.WriteLine($"{currentPlayer.Name} rolled {diceRoll} and moved to {currentPlayer.Position}");
+
             if (space.IsChance)
             {
                 var card = _cardManager.DrawChanceCard();
@@ -118,42 +113,32 @@ namespace MonopolyServer
             }
             else if (space.IsOwned && space.OwnedByPlayerId != clientId)
             {
-                //// 💸 תשלום שכירות
-                //var owner = _gameState.Players.First(p => p.Id == space.OwnedByPlayerId);
-                //currentPlayer.Money -= space.RentPrice;
-                //owner.Money += space.RentPrice;
-
-                //Console.WriteLine($"{currentPlayer.Name} paid ${space.RentPrice} to {owner.Name} for landing on {space.Name}.");
-
-                // שליחת הודעה ללקוח כדי להציג את חלון השכירות
                 var owner = _gameState.Players.First(p => p.Id == space.OwnedByPlayerId);
-
-                // שליחת הודעה ללקוח כדי לפתוח את חלון השכירות
                 var rentMessage = new GameMessage
                 {
                     Type = "ShowRentForm",
-                    Data = JsonSerializer.SerializeToElement(new
-                    {
-                        Property = space, // שולחים את האובייקט הקיים
-                        OwnerName = owner.Name
-                    })
+                    Data = JsonSerializer.SerializeToElement(new { Property = space, OwnerName = owner.Name })
                 };
-
-                string json = JsonSerializer.Serialize(rentMessage);
-                byte[] data = Encoding.UTF8.GetBytes(json);
-                await _clients[clientId].GetStream().WriteAsync(data, 0, data.Length);
+                Console.WriteLine("Sending ShowRentForm to " + clientId);
+                await SendMessageAsync(clientId, rentMessage);
+            }
+            else if (!space.IsOwned && currentPlayer.Money >= space.PurchasePrice)
+            {
+                var buyMessage = new GameMessage
+                {
+                    Type = "ShowBuyForm",
+                    Data = JsonSerializer.SerializeToElement(space)
+                };
+                Console.WriteLine("Sending ShowBuyForm to " + clientId);
+                await SendMessageAsync(clientId, buyMessage);
+                return; // חשוב: לא להתקדם לתור הבא עד שהשחקן יבחר
             }
 
-            // 🕹️ עדכון מיקום השחקן בלוח
-            _board.UpdatePlayerPosition(clientId, currentPlayer.Position);
-            Console.WriteLine($"{currentPlayer.Name} rolled {diceRoll} and moved to {currentPlayer.Position}");
-
-            // 🔄 מעבר לתור הבא
+            // תור עובר רק אם אין צורך בהצגת טופס
             _gameState.CurrentPlayerIndex = (_gameState.CurrentPlayerIndex + 1) % _gameState.Players.Count;
             Console.WriteLine($"Next turn: {_gameState.Players[_gameState.CurrentPlayerIndex].Name}");
 
-            // 📡 עדכון המצב ללקוחות
-            BroadcastGameState();
+            await BroadcastGameState();
         }
 
         private void HandleBuyProperty(string clientId, JsonElement data)
@@ -166,19 +151,18 @@ namespace MonopolyServer
             {
                 player.Money -= space.PurchasePrice;
                 space.OwnedByPlayerId = clientId;
-                player.OwnedProperties.Add(space.Name);
-
                 if (!player.OwnedProperties.Contains(space.Name))
                     player.OwnedProperties.Add(space.Name);
 
                 Console.WriteLine($"{player.Name} bought {space.Name} for ${space.PurchasePrice}");
-
-                BroadcastGameState();
             }
             else
             {
                 Console.WriteLine($"{player.Name} can't buy {propertyName}");
             }
+
+            _gameState.CurrentPlayerIndex = (_gameState.CurrentPlayerIndex + 1) % _gameState.Players.Count;
+            _ = BroadcastGameState();
         }
 
         private void HandlePayRent(string clientId, JsonElement data)
@@ -192,30 +176,22 @@ namespace MonopolyServer
             if (space != null && space.IsOwned && space.OwnedByPlayerId != clientId)
             {
                 player.Money -= rentPrice;
-
                 var owner = _gameState.Players.First(p => p.Id == space.OwnedByPlayerId);
                 owner.Money += rentPrice;
 
                 Console.WriteLine($"{player.Name} paid rent ${rentPrice} to {owner.Name} for {space.Name}");
-
-                BroadcastGameState();
             }
+
+            _gameState.CurrentPlayerIndex = (_gameState.CurrentPlayerIndex + 1) % _gameState.Players.Count;
+            _ = BroadcastGameState();
         }
 
         private void HandleEndGame(string clientId)
         {
-            if (!_isGameStarted)
-            {
-                Console.WriteLine("Game hasn't started yet.");
-                return;
-            }
+            if (!_isGameStarted) return;
 
             _isGameStarted = false;
-
-            // חישוב המנצח (לדוגמה, השחקן עם הכי הרבה כסף)
             var winner = _gameState.Players.OrderByDescending(p => p.Money).FirstOrDefault();
-
-            // שליחת הודעת סיום המשחק לכל הלקוחות
             BroadcastEndGame(winner);
         }
 
@@ -237,17 +213,13 @@ namespace MonopolyServer
             var player = new Player { Id = clientId, Name = playerName, Position = 0, CurrentProperty = _board.Spaces[0].Name };
             _gameState.Players.Add(player);
 
-            // שליחת הודעה לשחקן שהצטרף עם ה-Id שלו ושמו
             var joinSuccessMsg = new GameMessage
             {
                 Type = "JoinGameSuccess",
-                Data = JsonSerializer.SerializeToElement(player) // לשלוח את כל האובייקט של השחקן
+                Data = JsonSerializer.SerializeToElement(player)
             };
-
-            string json = JsonSerializer.Serialize(joinSuccessMsg);
-            byte[] bytes = Encoding.UTF8.GetBytes(json);
-            await _clients[clientId].GetStream().WriteAsync(bytes, 0, bytes.Length);
-
+            Console.WriteLine("Sending JoinGameSuccess to " + clientId);
+            await SendMessageAsync(clientId, joinSuccessMsg);
             await BroadcastGameState();
         }
 
@@ -258,16 +230,28 @@ namespace MonopolyServer
             Console.WriteLine($"Client connected: {clientId}");
 
             using var stream = client.GetStream();
-            byte[] buffer = new byte[4096];
-
+            var reader = new BinaryReader(stream, Encoding.UTF8);
             try
             {
                 while (true)
                 {
-                    int byteCount = await stream.ReadAsync(buffer, 0, buffer.Length);
-                    if (byteCount == 0) break;
+                    byte[] lengthBytes = new byte[4];
+                    int readLength = await stream.ReadAsync(lengthBytes, 0, 4);
+                    if (readLength == 0) break;
 
-                    string messageJson = Encoding.UTF8.GetString(buffer, 0, byteCount);
+                    int messageLength = BitConverter.ToInt32(lengthBytes, 0);
+                    if (messageLength <= 0) continue;
+
+                    byte[] messageBuffer = new byte[messageLength];
+                    int totalRead = 0;
+                    while (totalRead < messageLength)
+                    {
+                        int read = await stream.ReadAsync(messageBuffer, totalRead, messageLength - totalRead);
+                        if (read == 0) break;
+                        totalRead += read;
+                    }
+
+                    string messageJson = Encoding.UTF8.GetString(messageBuffer);
                     ProcessMessage(clientId, messageJson);
                 }
             }
@@ -277,8 +261,22 @@ namespace MonopolyServer
             }
 
             _clients.TryRemove(clientId, out _);
-            _playersReady.Remove(clientId); // השחקן התנתק
+            _playersReady.Remove(clientId);
             Console.WriteLine($"Client disconnected: {clientId}");
+        }
+
+        private async Task SendMessageAsync(string clientId, GameMessage message)
+        {
+            string json = JsonSerializer.Serialize(message);
+            byte[] data = Encoding.UTF8.GetBytes(json);
+            byte[] lengthPrefix = BitConverter.GetBytes(data.Length);
+
+            if (_clients.TryGetValue(clientId, out var client) && client.Connected)
+            {
+                var stream = client.GetStream();
+                await stream.WriteAsync(lengthPrefix, 0, lengthPrefix.Length);
+                await stream.WriteAsync(data, 0, data.Length);
+            }
         }
 
         private async Task BroadcastGameState()
@@ -288,27 +286,7 @@ namespace MonopolyServer
                 Type = "GameStateUpdate",
                 Data = JsonSerializer.SerializeToElement(_gameState)
             };
-
-            string json = JsonSerializer.Serialize(gameStateMsg);
-            byte[] data = Encoding.UTF8.GetBytes(json);
-
-            foreach (var kvp in _clients)
-            {
-                var client = kvp.Value;
-                if (client.Connected)
-                {
-                    try
-                    {
-                        var stream = client.GetStream();
-                        await stream.WriteAsync(data, 0, data.Length);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error sending to client {kvp.Key}: {ex.Message}");
-                    }
-                }
-            }
-            // 📌 הוספנו הודעת לוג למעקב אחרי תור השחקן
+            await BroadcastMessageAsync(gameStateMsg);
             Console.WriteLine($"Sent updated game state. Current turn: {_gameState.Players[_gameState.CurrentPlayerIndex].Name}");
         }
 
@@ -317,16 +295,17 @@ namespace MonopolyServer
             var endGameMessage = new GameMessage
             {
                 Type = "GameEnded",
-                Data = JsonSerializer.SerializeToElement(new
-                {
-                    WinnerId = winner.Id,
-                    WinnerName = winner.Name,
-                    WinnerMoney = winner.Money
-                })
+                Data = JsonSerializer.SerializeToElement(new { WinnerId = winner.Id, WinnerName = winner.Name, WinnerMoney = winner.Money })
             };
+            await BroadcastMessageAsync(endGameMessage);
+            Console.WriteLine($"Game ended! Winner is {winner.Name}");
+        }
 
-            string json = JsonSerializer.Serialize(endGameMessage);
+        private async Task BroadcastMessageAsync(GameMessage message)
+        {
+            string json = JsonSerializer.Serialize(message);
             byte[] data = Encoding.UTF8.GetBytes(json);
+            byte[] lengthPrefix = BitConverter.GetBytes(data.Length);
 
             foreach (var kvp in _clients)
             {
@@ -336,6 +315,7 @@ namespace MonopolyServer
                     try
                     {
                         var stream = client.GetStream();
+                        await stream.WriteAsync(lengthPrefix, 0, lengthPrefix.Length);
                         await stream.WriteAsync(data, 0, data.Length);
                     }
                     catch (Exception ex)
@@ -344,22 +324,14 @@ namespace MonopolyServer
                     }
                 }
             }
-
-            Console.WriteLine($"Game ended! Winner is {winner.Name}");
         }
 
         public void Stop()
         {
             Console.WriteLine("Stopping server...");
-
-            _listener.Stop(); // עוצר את ה-listener מלקבל לקוחות חדשים
-            foreach (var client in _clients.Values)
-            {
-                client.Close(); // סגירת כל החיבורים הפעילים
-            }
-
+            _listener.Stop();
+            foreach (var client in _clients.Values) client.Close();
             Console.WriteLine("Server stopped.");
         }
-
     }
 }

@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using MonopolyCommon;
 using MonopolyServer;
+using MonopolyCommon;
 using System.Text.Json;
 using System.Net.Sockets;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.IO;
-using MonapolClientUI.Forms;
-using MoanpolyClientWinforms;
 using System.Windows.Forms;
-using Newtonsoft.Json;
+using MonapolClientUI.Forms;
+using System.Threading.Tasks;
+using MoanpolyClientWinforms;
+using System.Collections.Generic;
 
 namespace MonopolyClient
 {
@@ -20,10 +18,11 @@ namespace MonopolyClient
         private TcpClient _client;
         private NetworkStream _stream;
         private string _myPlayerId;
+        private bool _buyFormOpen = false;
+        private HashSet<string> _buyFormShownForProperties = new();
 
         public string MyPlayerId => _myPlayerId;
-        public Board Board { get; private set; }
-        public List<Player> Players { get; private set; }
+        public List<Player> Players { get; private set; } = new();
         public List<BoardSpace> BoardSpaces { get; private set; }
 
         public event Action<string> MessageReceived;
@@ -31,36 +30,31 @@ namespace MonopolyClient
         public event Action PlayersUpdated;
         public event Action<string> GameEnded;
 
-        public GameClient()
-        {
-            Players = new List<Player>();
-        }
-
         private async void StartListening()
         {
             try
             {
                 while (true)
                 {
-                    using (var memoryStream = new MemoryStream())
+                    byte[] lengthBuffer = new byte[4];
+                    int readLen = await _stream.ReadAsync(lengthBuffer, 0, 4);
+                    if (readLen == 0) break;
+
+                    int messageLength = BitConverter.ToInt32(lengthBuffer, 0);
+                    if (messageLength <= 0) continue;
+
+                    byte[] data = new byte[messageLength];
+                    int totalRead = 0;
+                    while (totalRead < messageLength)
                     {
-                        byte[] buffer = new byte[8192]; // הגדלת ה-buffer
-                        int bytesRead;
-
-                        // קריאה רציפה עד שהזרם מסתיים
-                        while ((bytesRead = await _stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                        {
-                            memoryStream.Write(buffer, 0, bytesRead);
-
-                            // אם התקבל פחות מה-buffer המלא, סביר להניח שסיימנו
-                            if (bytesRead < buffer.Length)
-                                break;
-                        }
-
-                        string message = Encoding.UTF8.GetString(memoryStream.ToArray());
-                        Console.WriteLine($"DEBUG: Received message: {message}"); // הדפסת ההודעה המלאה
-                        HandleMessage(message);
+                        int read = await _stream.ReadAsync(data, totalRead, messageLength - totalRead);
+                        if (read == 0) break;
+                        totalRead += read;
                     }
+
+                    string json = Encoding.UTF8.GetString(data);
+                    Console.WriteLine($"DEBUG: Received message: {json}");
+                    HandleMessage(json);
                 }
             }
             catch (Exception ex)
@@ -69,141 +63,127 @@ namespace MonopolyClient
             }
         }
 
-
         private void HandleMessage(string messageJson)
         {
-            var gameMessage = System.Text.Json.JsonSerializer.Deserialize<GameMessage>(messageJson);
+            var gameMessage = JsonSerializer.Deserialize<GameMessage>(messageJson);
             if (gameMessage == null) return;
 
             switch (gameMessage.Type)
             {
-                case "PlayerListUpdate":
-                    Players = System.Text.Json.JsonSerializer.Deserialize<List<Player>>(gameMessage.Data.ToString());
-                    PlayersUpdated?.Invoke();
+                case "JoinGameSuccess":
+                    var player = JsonSerializer.Deserialize<Player>(gameMessage.Data.ToString());
+                    _myPlayerId = player.Id;
+                    MessageReceived?.Invoke($"You joined successfully. Your ID is {_myPlayerId}.");
                     break;
 
                 case "GameStateUpdate":
-                    var gameState = System.Text.Json.JsonSerializer.Deserialize<GameState>(gameMessage.Data.ToString());
+                    var gameState = JsonSerializer.Deserialize<GameState>(gameMessage.Data.ToString());
                     Players = gameState.Players;
                     BoardSpaces = gameState.Board.Spaces;
                     bool isMyTurn = Players[gameState.CurrentPlayerIndex].Id == _myPlayerId;
                     MyTurnUpdated?.Invoke(isMyTurn);
                     PlayersUpdated?.Invoke();
-                    Console.WriteLine($"DEBUG: Current player is {Players[gameState.CurrentPlayerIndex].Name}");
 
-                    //// כאן להוסיף את השורות הבאות:
-                    //foreach (var space in BoardSpaces)
-                    //{
-                    //    if (space.IsOwned)
-                    //        Console.WriteLine($"DEBUG: Space {space.Name} owned by {space.OwnedByPlayerId}");
-                    //}
+                    // 🧽 ננקה את סט הטפסים שכבר הוצגו ברגע שהתור עבר
+                    if (!isMyTurn)
+                        _buyFormShownForProperties.Clear();
 
-                    break;
-
-                case "JoinGameSuccess":
-                    var player = System.Text.Json.JsonSerializer.Deserialize<Player>(gameMessage.Data.ToString());
-                    _myPlayerId = player.Id;
-                    MessageReceived?.Invoke($"You joined successfully. Your ID is {_myPlayerId}.");
                     break;
 
                 case "GameEnded":
                     string winnerName = gameMessage.Data.GetProperty("WinnerName").GetString();
                     int winnerMoney = gameMessage.Data.GetProperty("WinnerMoney").GetInt32();
-                    string endGameMessage = $"Game Ended! Winner: {winnerName}, Money: ${winnerMoney}";
-                    GameEnded?.Invoke(endGameMessage);
+                    GameEnded?.Invoke($"Game Ended! Winner: {winnerName}, Money: ${winnerMoney}");
+                    break;
+
+                case "ShowBuyForm":
+                    var propertyToBuy = JsonSerializer.Deserialize<BoardSpace>(gameMessage.Data.ToString());
+                    if (propertyToBuy == null) return;
+
+                    string propKey = propertyToBuy.Name;
+                    if (_buyFormShownForProperties.Contains(propKey)) return;
+                    _buyFormShownForProperties.Add(propKey);
+
+                    if (Application.OpenForms["MonopolyForm"] is MonopolyForm mainForm)
+                    {
+                        mainForm.Invoke(new Action(() =>
+                        {
+                            using var form = new Form_buy(this, propertyToBuy);
+                            form.ShowDialog();
+                        }));
+                    }
                     break;
 
                 case "ShowRentForm":
-                    var rentData = System.Text.Json.JsonSerializer.Deserialize<JsonElement>(gameMessage.Data.ToString());
-                    var space = System.Text.Json.JsonSerializer.Deserialize<BoardSpace>(rentData.GetProperty("Property").ToString());
+                    var rentData = JsonSerializer.Deserialize<JsonElement>(gameMessage.Data.ToString());
+                    var space = JsonSerializer.Deserialize<BoardSpace>(rentData.GetProperty("Property").ToString());
                     string ownerName = rentData.GetProperty("OwnerName").GetString();
 
-                    if (space != null)
+                    if (space != null && Application.OpenForms["MonopolyForm"] is Form formMain)
                     {
-                        if (Application.OpenForms["MonopolyForm"] is MonopolyForm mainForm)
+                        formMain.Invoke(new Action(() =>
                         {
-                            mainForm.Invoke(new Action(() =>
-                            {
-                                using (Form_rent rentForm = new Form_rent(this, space, space.RentPrice, ownerName))
-                                {
-                                    rentForm.ShowDialog();
-                                }
-                            }));
-                        }
+                            using var rentForm = new Form_rent(this, space, space.RentPrice, ownerName);
+                            rentForm.ShowDialog();
+                        }));
                     }
                     break;
             }
         }
 
-        public string GetPlayerPositionDisplay(string playerId)
-        {
-            var player = Players.FirstOrDefault(p => p.Id == playerId);
-            if (player != null)
-            {
-                return $"Position: {player.Position} ({player.CurrentProperty})";
-            }
-            return "Player not found";
-        }
-
-        public async Task ConnectAsync(string ipAddress, int port)
+        public async Task ConnectAsync(string ip, int port)
         {
             _client = new TcpClient();
-            await _client.ConnectAsync(ipAddress, port);
+            await _client.ConnectAsync(ip, port);
             _stream = _client.GetStream();
             StartListening();
         }
 
         public async Task SendMessageAsync(GameMessage message)
         {
-            string json = System.Text.Json.JsonSerializer.Serialize(message);
+            string json = JsonSerializer.Serialize(message);
             byte[] data = Encoding.UTF8.GetBytes(json);
+            byte[] prefix = BitConverter.GetBytes(data.Length);
+
+            await _stream.WriteAsync(prefix, 0, prefix.Length);
             await _stream.WriteAsync(data, 0, data.Length);
         }
 
-        public async Task JoinGameAsync(string playerName)
+        public async Task JoinGameAsync(string name)
         {
-            var joinMessage = new GameMessage
+            var msg = new GameMessage
             {
                 Type = "JoinGame",
-                Data = System.Text.Json.JsonSerializer.SerializeToElement(new { Name = playerName })
+                Data = JsonSerializer.SerializeToElement(new { Name = name })
             };
-            await SendMessageAsync(joinMessage);
-
-            if (Players == null)
-            {
-                Players = new List<Player>();
-            }
+            await SendMessageAsync(msg);
         }
 
         public async Task StartGameAsync()
         {
-            var startMessage = new GameMessage
-            {
-                Type = "StartGame",
-                Data = System.Text.Json.JsonSerializer.SerializeToElement(new { })
-            };
-            await SendMessageAsync(startMessage);
+            await SendMessageAsync(new GameMessage { Type = "StartGame", Data = JsonSerializer.SerializeToElement(new { }) });
         }
 
         public async Task RollDiceAsync()
-        {    
-            var rollMessage = new GameMessage
-            {
-                Type = "RollDice",
-                Data = System.Text.Json.JsonSerializer.SerializeToElement(new { })
-            };
-            await SendMessageAsync(rollMessage);
+        {
+            await SendMessageAsync(new GameMessage { Type = "RollDice", Data = JsonSerializer.SerializeToElement(new { }) });
         }
 
         public async Task EndGame()
         {
-            await SendMessageAsync(new GameMessage { Type = "EndGame", Data = System.Text.Json.JsonSerializer.SerializeToElement(new { }) });
+            await SendMessageAsync(new GameMessage { Type = "EndGame", Data = JsonSerializer.SerializeToElement(new { }) });
         }
 
         public void Disconnect()
         {
-            _stream.Close();
-            _client.Close();
+            _stream?.Close();
+            _client?.Close();
+        }
+
+        public string GetPlayerPositionDisplay(string playerId)
+        {
+            var player = Players.FirstOrDefault(p => p.Id == playerId);
+            return player != null ? $"Position: {player.Position} ({player.CurrentProperty})" : "Player not found";
         }
     }
 }

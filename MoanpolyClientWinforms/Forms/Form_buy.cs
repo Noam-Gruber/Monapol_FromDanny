@@ -1,9 +1,9 @@
 ﻿using System;
 using MonopolyClient;
 using MonopolyCommon;
-using MonopolyServer;
 using System.Text.Json;
 using System.Windows.Forms;
+using MonopolyServer;
 
 namespace MonapolClientUI.Forms
 {
@@ -11,6 +11,7 @@ namespace MonapolClientUI.Forms
     {
         private readonly GameClient _client;
         private readonly BoardSpace _space;
+        private bool hasSent = false;
 
         public Form_buy(GameClient client, BoardSpace space)
         {
@@ -25,6 +26,9 @@ namespace MonapolClientUI.Forms
 
         private async void btnOK_Click(object sender, EventArgs e)
         {
+            if (hasSent) return;
+            hasSent = true;
+
             await _client.SendMessageAsync(new GameMessage
             {
                 Type = "BuyProperty",

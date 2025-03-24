@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Linq;
+using System.Drawing;
 using MonopolyClient;
 using System.Windows.Forms;
-using MonapolClientUI.Forms;
-using System.Drawing;
 
 namespace MoanpolyClientWinforms
 {
-    public partial class MonopolyForm: Form
+    public partial class MonopolyForm : Form
     {
         private GameClient _client;
-        private bool _buyFormOpenedThisTurn = false;
 
         public MonopolyForm()
         {
@@ -20,6 +18,7 @@ namespace MoanpolyClientWinforms
         private async void btnConnect_Click(object sender, EventArgs e)
         {
             _client = new GameClient();
+            string playerName = txtPlayerName.Text;
             await _client.ConnectAsync("127.0.0.1", 5000);
 
             _client.MessageReceived += (message) =>
@@ -32,34 +31,11 @@ namespace MoanpolyClientWinforms
 
             _client.MyTurnUpdated += (isMyTurn) =>
             {
-                Invoke(new Action(() =>
+                Invoke(new Action(async () =>
                 {
                     btnRollDice.Enabled = isMyTurn && !btnStartGame.Enabled;
                     btnEndGame.Enabled = !btnStartGame.Enabled;
-                    WriteToLogger(isMyTurn ? "It's your turn!" : "Waiting for other players...");
-                    if (isMyTurn && !_buyFormOpenedThisTurn)
-                    {
-                        var player = _client.Players.FirstOrDefault(p => p.Id == _client.MyPlayerId);
-                        var currentSpace = _client.BoardSpaces[player.Position];
-
-                        if (currentSpace.IsOwned && currentSpace.OwnedByPlayerId != player.Id)
-                        {
-                            var owner = _client.Players.FirstOrDefault(p => p.Id == currentSpace.OwnedByPlayerId);
-                            using (Form_rent rentForm = new Form_rent(_client, currentSpace, currentSpace.RentPrice, owner?.Name ?? "Unknown"))
-                            {
-                                rentForm.ShowDialog();
-                            }
-                        }
-                        else if (!currentSpace.IsOwned && !currentSpace.IsSpecial && player.Money >= currentSpace.PurchasePrice)
-                        {
-                            _buyFormOpenedThisTurn = true; // הגדרת החלון כנפתח עבור התור הנוכחי
-                            using (Form_buy buyForm = new Form_buy(_client, currentSpace))
-                            {
-                                buyForm.ShowDialog();
-                            }
-                        }
-                    }
-                    WriteToLogger(isMyTurn ? "It's your turn!" : "Waiting for other players...");
+                    WriteToLogger(isMyTurn ? $"It's your turn {playerName}!" : "Waiting for other players...");
                 }));
             };
 
@@ -68,7 +44,6 @@ namespace MoanpolyClientWinforms
                 Invoke(new Action(() =>
                 {
                     UpdatePlayerPositionsDisplay();
-                    //UpdatePlayerPropertiesDisplay();
                 }));
             };
 
@@ -106,9 +81,10 @@ namespace MoanpolyClientWinforms
 
         private async void btnRollDice_Click(object sender, EventArgs e)
         {
-            _buyFormOpenedThisTurn = false;
+            string playerName = txtPlayerName.Text;
+            //_buyFormOpenedThisTurn = false;
+            WriteToLogger($"{playerName}- Roll Dice");
             await _client.RollDiceAsync();  // שלח בקשה לשרת לביצוע גלגול קוביות
-            WriteToLogger("Roll Dice");
         }
 
         private async void btnStartGame_Click(object sender, EventArgs e)
