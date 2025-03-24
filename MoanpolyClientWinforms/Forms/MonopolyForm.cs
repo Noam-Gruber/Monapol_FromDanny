@@ -9,7 +9,8 @@ namespace MoanpolyClientWinforms
     public partial class MonopolyForm : Form
     {
         private GameClient _client;
-
+        private const int _serverPort = 5000;
+        private const string _serverAddress = "127.0.0.1";
         public MonopolyForm()
         {
             InitializeComponent();
@@ -19,7 +20,7 @@ namespace MoanpolyClientWinforms
         {
             _client = new GameClient();
             string playerName = txtPlayerName.Text;
-            await _client.ConnectAsync("127.0.0.1", 5000);
+            await _client.ConnectAsync(_serverAddress, _serverPort);
 
             _client.MessageReceived += (message) =>
             {
@@ -111,7 +112,6 @@ namespace MoanpolyClientWinforms
         {
             if (_client != null && _client.Players != null && _client.BoardSpaces != null)
             {
-                // נניח שהחלפת את ה-ListBox ל-RichTextBox בשם rtbPlayerPositions
                 rtbPlayerPositions.Clear();
                 rtbPlayerProperties.Clear();
                 rtbPlayerMoney.Clear();
