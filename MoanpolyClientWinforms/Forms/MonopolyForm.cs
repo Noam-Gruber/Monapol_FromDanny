@@ -32,7 +32,7 @@ namespace MoanpolyClientWinforms
 
             _client.MyTurnUpdated += (isMyTurn) =>
             {
-                Invoke(new Action(async () =>
+                Invoke(new Action(() =>
                 {
                     btnRollDice.Enabled = isMyTurn && !btnStartGame.Enabled;
                     btnEndGame.Enabled = !btnStartGame.Enabled;
