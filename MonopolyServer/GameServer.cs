@@ -97,7 +97,9 @@ namespace MonopolyServer
             var space = _board.Spaces[currentPlayer.Position];
 
             _board.UpdatePlayerPosition(clientId, currentPlayer.Position);
-            Console.WriteLine($"{currentPlayer.Name} rolled {diceRoll} and moved to {currentPlayer.Position}");
+            string log = $"{currentPlayer.Name} rolled {diceRoll} and moved to {currentPlayer.Position}- {currentPlayer.CurrentProperty}";
+            Console.WriteLine(log);
+            await BroadcastLogMessageAsync(log);
 
             if (space.IsChance)
             {
@@ -324,6 +326,26 @@ namespace MonopolyServer
                     }
                 }
             }
+        }
+
+        private async Task SendLogMessageAsync(string clientId, string logText)
+        {
+            var logMessage = new GameMessage
+            {
+                Type = "ServerLog",
+                Data = JsonSerializer.SerializeToElement(new { Text = logText })
+            };
+            await SendMessageAsync(clientId, logMessage);
+        }
+
+        private async Task BroadcastLogMessageAsync(string text)
+        {
+            var logMessage = new GameMessage
+            {
+                Type = "ServerLog",
+                Data = JsonSerializer.SerializeToElement(new { Text = text })
+            };
+            await BroadcastMessageAsync(logMessage);
         }
 
         public void Stop()

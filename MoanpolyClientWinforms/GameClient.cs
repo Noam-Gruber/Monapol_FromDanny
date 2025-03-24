@@ -128,6 +128,11 @@ namespace MonopolyClient
                         }));
                     }
                     break;
+
+                case "ServerLog":
+                    string text = gameMessage.Data.GetProperty("Text").GetString();
+                    MessageReceived?.Invoke(text);
+                    break;
             }
         }
 
