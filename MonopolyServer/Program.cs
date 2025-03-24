@@ -10,7 +10,6 @@ namespace MonopolyServer
             int port = 5000;
             GameServer server = new GameServer(port);
 
-            // טיפול בסגירה מסודרת
             Console.CancelKeyPress += (sender, eventArgs) =>
             {
                 Console.WriteLine("Shutting down server...");

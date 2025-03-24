@@ -13,8 +13,7 @@ namespace MonopolyServer
 
             Spaces = new List<BoardSpace>();
 
-            // יצירת שטחים עם מחירים ושמות - כאן נממש את השטחים הרגילים והמיוחדים
-            Spaces.Add(new BoardSpace(0, "Go", 0, 0, true));  // דוגמת שטח מיוחד
+            Spaces.Add(new BoardSpace(0, "Go", 0, 0, true));
             Spaces.Add(new BoardSpace(1, "Mediterranean Avenue", 60, 2));
             Spaces.Add(new BoardSpace(2, "Community Chest", 0, 0, true) { IsCommunityChest = true });  // שטח מיוחד
             Spaces.Add(new BoardSpace(3, "Baltic Avenue", 60, 4));
@@ -56,7 +55,6 @@ namespace MonopolyServer
             Spaces.Add(new BoardSpace(39, "Boardwalk", 400, 50));
         }
 
-        // פונקציה לעדכון המיקום של שחקן בלוח
         public void UpdatePlayerPosition(string playerId, int newPosition)
         {
             if (PlayerPositions.ContainsKey(playerId))
@@ -67,18 +65,6 @@ namespace MonopolyServer
             {
                 PlayerPositions.Add(playerId, newPosition);
             }
-        }
-
-        // פונקציה להחזרת המיקום של שחקן בלוח (כולל המידע על השטח)
-        public string GetPlayerPositionDisplay(string playerId)
-        {
-            if (PlayerPositions.ContainsKey(playerId))
-            {
-                int position = PlayerPositions[playerId];
-                BoardSpace space = Spaces[position];
-                return $"{space.Name} - Purchase Price: {space.PurchasePrice}, Rent Price: {space.RentPrice}";
-            }
-            return "Player not on board";
         }
     }
 }
