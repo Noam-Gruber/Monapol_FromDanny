@@ -80,6 +80,7 @@
             // 
             // btnJoinGame
             // 
+            this.btnJoinGame.Enabled = false;
             this.btnJoinGame.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
             this.btnJoinGame.Location = new System.Drawing.Point(255, 13);
             this.btnJoinGame.Name = "btnJoinGame";

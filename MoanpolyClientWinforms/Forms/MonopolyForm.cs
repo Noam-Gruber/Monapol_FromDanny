@@ -60,6 +60,7 @@ namespace MoanpolyClientWinforms
             };
 
             btnConnect.Enabled = false;
+            btnJoinGame.Enabled = true;
             WriteToLogger("Connected to server.");
         }
 
@@ -84,7 +85,6 @@ namespace MoanpolyClientWinforms
         private async void btnRollDice_Click(object sender, EventArgs e)
         {
             string playerName = txtPlayerName.Text;
-            //_buyFormOpenedThisTurn = false;
             WriteToLogger($"{playerName}- Roll Dice");
             await _client.RollDiceAsync();  // שלח בקשה לשרת לביצוע גלגול קוביות
         }

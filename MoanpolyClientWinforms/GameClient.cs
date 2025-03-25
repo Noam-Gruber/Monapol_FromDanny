@@ -18,7 +18,6 @@ namespace MonopolyClient
         private TcpClient _client;
         private NetworkStream _stream;
         private string _myPlayerId;
-        private bool _buyFormOpen = false;
         private HashSet<string> _buyFormShownForProperties = new();
 
         public string MyPlayerId => _myPlayerId;
@@ -156,12 +155,7 @@ namespace MonopolyClient
 
         public async Task JoinGameAsync(string name)
         {
-            var msg = new GameMessage
-            {
-                Type = "JoinGame",
-                Data = JsonSerializer.SerializeToElement(new { Name = name })
-            };
-            await SendMessageAsync(msg);
+            await SendMessageAsync(new GameMessage { Type = "JoinGame", Data = JsonSerializer.SerializeToElement(new { Name = name }) });
         }
 
         public async Task StartGameAsync()
@@ -187,7 +181,7 @@ namespace MonopolyClient
 
         public string GetPlayerPositionDisplay(string playerId)
         {
-            var player = Players.FirstOrDefault(p => p.Id == playerId);
+            Player player = Players.FirstOrDefault(p => p.Id == playerId);
             return player != null ? $"Position: {player.Position} ({player.CurrentProperty})" : "Player not found";
         }
     }

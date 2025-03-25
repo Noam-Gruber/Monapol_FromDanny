@@ -97,9 +97,7 @@ namespace MonopolyServer
             var space = _board.Spaces[currentPlayer.Position];
 
             _board.UpdatePlayerPosition(clientId, currentPlayer.Position);
-            string log = $"{currentPlayer.Name} rolled {diceRoll} and moved to {currentPlayer.Position}- {currentPlayer.CurrentProperty}";
-            Console.WriteLine(log);
-            await BroadcastLogMessageAsync(log);
+            await BroadcastLogMessageAsync($"{currentPlayer.Name} rolled {diceRoll} and moved to {currentPlayer.Position}- {currentPlayer.CurrentProperty}");
 
             if (space.IsChance)
             {
@@ -143,7 +141,7 @@ namespace MonopolyServer
             await BroadcastGameState();
         }
 
-        private void HandleBuyProperty(string clientId, JsonElement data)
+        private async void HandleBuyProperty(string clientId, JsonElement data)
         {
             string propertyName = data.GetProperty("PropertyName").GetString();
             var space = _board.Spaces.FirstOrDefault(s => s.Name == propertyName);
@@ -156,7 +154,7 @@ namespace MonopolyServer
                 if (!player.OwnedProperties.Contains(space.Name))
                     player.OwnedProperties.Add(space.Name);
 
-                Console.WriteLine($"{player.Name} bought {space.Name} for ${space.PurchasePrice}");
+                await BroadcastLogMessageAsync($"{player.Name} bought {space.Name} for ${space.PurchasePrice}");
             }
             else
             {
@@ -328,16 +326,6 @@ namespace MonopolyServer
             }
         }
 
-        private async Task SendLogMessageAsync(string clientId, string logText)
-        {
-            var logMessage = new GameMessage
-            {
-                Type = "ServerLog",
-                Data = JsonSerializer.SerializeToElement(new { Text = logText })
-            };
-            await SendMessageAsync(clientId, logMessage);
-        }
-
         private async Task BroadcastLogMessageAsync(string text)
         {
             var logMessage = new GameMessage
@@ -345,6 +333,7 @@ namespace MonopolyServer
                 Type = "ServerLog",
                 Data = JsonSerializer.SerializeToElement(new { Text = text })
             };
+            Console.WriteLine(text);
             await BroadcastMessageAsync(logMessage);
         }
 
