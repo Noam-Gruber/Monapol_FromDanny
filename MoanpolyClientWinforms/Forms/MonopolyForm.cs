@@ -11,6 +11,7 @@ namespace MoanpolyClientWinforms
         private GameClient _client;
         private const int _serverPort = 5000;
         private const string _serverAddress = "127.0.0.1";
+
         public MonopolyForm()
         {
             InitializeComponent();
@@ -19,7 +20,6 @@ namespace MoanpolyClientWinforms
         private async void btnConnect_Click(object sender, EventArgs e)
         {
             _client = new GameClient();
-            string playerName = txtPlayerName.Text;
             await _client.ConnectAsync(_serverAddress, _serverPort);
 
             _client.MessageReceived += (message) =>
@@ -34,6 +34,7 @@ namespace MoanpolyClientWinforms
             {
                 Invoke(new Action(() =>
                 {
+                    string playerName = txtPlayerName.Text;
                     btnRollDice.Enabled = isMyTurn && !btnStartGame.Enabled;
                     btnEndGame.Enabled = !btnStartGame.Enabled;
                     WriteToLogger(isMyTurn ? $"It's your turn {playerName}!" : "Waiting for other players...");
@@ -68,11 +69,11 @@ namespace MoanpolyClientWinforms
             if (!string.IsNullOrWhiteSpace(playerName))
             {
                 await _client.JoinGameAsync(playerName);
-                WriteToLogger($"Joined the game as {playerName}.");
                 btnJoinGame.Enabled = false;
                 txtPlayerName.Enabled = false;
-                // הצג את המיקום ההתחלתי
+                btnStartGame.Enabled = true;
                 UpdatePlayerPositionsDisplay();
+                WriteToLogger($"Joined the game as {playerName}.");
             }
             else
             {

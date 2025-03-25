@@ -32,7 +32,6 @@
             this.btnRollDice = new System.Windows.Forms.Button();
             this.txtPlayerName = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.btnConnect = new System.Windows.Forms.Button();
             this.btnJoinGame = new System.Windows.Forms.Button();
             this.btnStartGame = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -42,6 +41,7 @@
             this.rtbPlayerPositions = new System.Windows.Forms.RichTextBox();
             this.rtbPlayerProperties = new System.Windows.Forms.RichTextBox();
             this.rtbPlayerMoney = new System.Windows.Forms.RichTextBox();
+            this.btnConnect = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -78,17 +78,6 @@
             this.label1.TabIndex = 3;
             this.label1.Text = "Name of player:";
             // 
-            // btnConnect
-            // 
-            this.btnConnect.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            this.btnConnect.Location = new System.Drawing.Point(3, 5);
-            this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(118, 49);
-            this.btnConnect.TabIndex = 4;
-            this.btnConnect.Text = "Connect to Server";
-            this.btnConnect.UseVisualStyleBackColor = true;
-            this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
-            // 
             // btnJoinGame
             // 
             this.btnJoinGame.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
@@ -102,6 +91,7 @@
             // 
             // btnStartGame
             // 
+            this.btnStartGame.Enabled = false;
             this.btnStartGame.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
             this.btnStartGame.Location = new System.Drawing.Point(365, 11);
             this.btnStartGame.Name = "btnStartGame";
@@ -183,6 +173,17 @@
             this.rtbPlayerMoney.TabIndex = 21;
             this.rtbPlayerMoney.Text = "";
             // 
+            // btnConnect
+            // 
+            this.btnConnect.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
+            this.btnConnect.Location = new System.Drawing.Point(3, 5);
+            this.btnConnect.Name = "btnConnect";
+            this.btnConnect.Size = new System.Drawing.Size(118, 49);
+            this.btnConnect.TabIndex = 4;
+            this.btnConnect.Text = "Connect to Server";
+            this.btnConnect.UseVisualStyleBackColor = true;
+            this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
+            // 
             // MonopolyForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -212,7 +213,6 @@
         private System.Windows.Forms.Button btnRollDice;
         private System.Windows.Forms.TextBox txtPlayerName;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button btnConnect;
         private System.Windows.Forms.Button btnJoinGame;
         private System.Windows.Forms.Button btnStartGame;
         private System.Windows.Forms.PictureBox pictureBox1;
@@ -222,6 +222,7 @@
         private System.Windows.Forms.RichTextBox rtbPlayerPositions;
         private System.Windows.Forms.RichTextBox rtbPlayerProperties;
         private System.Windows.Forms.RichTextBox rtbPlayerMoney;
+        private System.Windows.Forms.Button btnConnect;
     }
 }
 
