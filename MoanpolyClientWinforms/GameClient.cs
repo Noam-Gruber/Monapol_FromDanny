@@ -10,6 +10,8 @@ using MonapolClientUI.Forms;
 using System.Threading.Tasks;
 using MoanpolyClientWinforms;
 using System.Collections.Generic;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 namespace MonopolyClient
 {
@@ -17,8 +19,8 @@ namespace MonopolyClient
     {
         private TcpClient _client;
         private string _myPlayerId;
-        private NetworkStream _stream;
         private HashSet<string> _buyFormShownForProperties = new();
+        private SslStream _sslStream;
 
         public string MyPlayerId => _myPlayerId;
         public List<Player> Players { get; private set; } = new();
@@ -36,7 +38,7 @@ namespace MonopolyClient
                 while (true)
                 {
                     byte[] lengthBuffer = new byte[4];
-                    int readLen = await _stream.ReadAsync(lengthBuffer, 0, 4);
+                    int readLen = await _sslStream.ReadAsync(lengthBuffer, 0, 4);
                     if (readLen == 0) break;
 
                     int messageLength = BitConverter.ToInt32(lengthBuffer, 0);
@@ -46,7 +48,7 @@ namespace MonopolyClient
                     int totalRead = 0;
                     while (totalRead < messageLength)
                     {
-                        int read = await _stream.ReadAsync(data, totalRead, messageLength - totalRead);
+                        int read = await _sslStream.ReadAsync(data, totalRead, messageLength - totalRead);
                         if (read == 0) break;
                         totalRead += read;
                     }
@@ -139,9 +141,14 @@ namespace MonopolyClient
         {
             _client = new TcpClient();
             await _client.ConnectAsync(ip, port);
-            _stream = _client.GetStream();
+
+            var stream = _client.GetStream();
+            _sslStream = new SslStream(stream, false, (sender, cert, chain, errors) => true); // ❗ מקבל כל תעודה (לבדיקה בלבד)
+
+            await _sslStream.AuthenticateAsClientAsync("localhost");
             StartListening();
         }
+
 
         public async Task SendMessageAsync(GameMessage message)
         {
@@ -149,8 +156,8 @@ namespace MonopolyClient
             byte[] data = Encoding.UTF8.GetBytes(json);
             byte[] prefix = BitConverter.GetBytes(data.Length);
 
-            await _stream.WriteAsync(prefix, 0, prefix.Length);
-            await _stream.WriteAsync(data, 0, data.Length);
+            await _sslStream.WriteAsync(prefix, 0, prefix.Length);
+            await _sslStream.WriteAsync(data, 0, data.Length);
         }
 
         public async Task JoinGameAsync(string name)
@@ -175,7 +182,7 @@ namespace MonopolyClient
 
         public void Disconnect()
         {
-            _stream?.Close();
+            _sslStream?.Close();
             _client?.Close();
         }
 

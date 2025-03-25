@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Net;
 using System.Text;
 using System.Linq;
@@ -7,8 +6,11 @@ using MonopolyCommon;
 using System.Text.Json;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Security.Cryptography.X509Certificates;
+using System.Net.Security;
+using System.IO;
 
 namespace MonopolyServer
 {
@@ -18,14 +20,21 @@ namespace MonopolyServer
         private readonly ConcurrentDictionary<string, TcpClient> _clients = new();
         private readonly GameState _gameState = new();
         private readonly Board _board = new Board();
+        private const string _certPath = "cert.pfx";
+        private const string _password = "aviel";
 
         private bool _isGameStarted = false;
         private HashSet<string> _playersReady = new HashSet<string>();
         private CardManager _cardManager = new CardManager();
+        private X509Certificate2 _serverCertificate;
 
         public GameServer(int port)
         {
             _listener = new TcpListener(IPAddress.Any, port);
+            string basePath = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\.."));
+            string certPath = Path.Combine(basePath, _certPath);
+            
+            _serverCertificate = new X509Certificate2(certPath, _password);
         }
 
         private async void ProcessMessage(string clientId, string messageJson)
@@ -229,14 +238,17 @@ namespace MonopolyServer
             _clients.TryAdd(clientId, client);
             Console.WriteLine($"Client connected: {clientId}");
 
-            using var stream = client.GetStream();
-            var reader = new BinaryReader(stream, Encoding.UTF8);
+            var stream = client.GetStream();
+            var sslStream = new SslStream(stream, false);
             try
             {
+                await sslStream.AuthenticateAsServerAsync(_serverCertificate, clientCertificateRequired: false, checkCertificateRevocation: false);
+                _sslStreams.TryAdd(clientId, sslStream);
+
                 while (true)
                 {
                     byte[] lengthBytes = new byte[4];
-                    int readLength = await stream.ReadAsync(lengthBytes, 0, 4);
+                    int readLength = await sslStream.ReadAsync(lengthBytes, 0, 4);
                     if (readLength == 0) break;
 
                     int messageLength = BitConverter.ToInt32(lengthBytes, 0);
@@ -246,7 +258,7 @@ namespace MonopolyServer
                     int totalRead = 0;
                     while (totalRead < messageLength)
                     {
-                        int read = await stream.ReadAsync(messageBuffer, totalRead, messageLength - totalRead);
+                        int read = await sslStream.ReadAsync(messageBuffer, totalRead, messageLength - totalRead);
                         if (read == 0) break;
                         totalRead += read;
                     }
@@ -265,17 +277,18 @@ namespace MonopolyServer
             Console.WriteLine($"Client disconnected: {clientId}");
         }
 
+        private readonly ConcurrentDictionary<string, SslStream> _sslStreams = new();
+
         private async Task SendMessageAsync(string clientId, GameMessage message)
         {
             string json = JsonSerializer.Serialize(message);
             byte[] data = Encoding.UTF8.GetBytes(json);
             byte[] lengthPrefix = BitConverter.GetBytes(data.Length);
 
-            if (_clients.TryGetValue(clientId, out var client) && client.Connected)
+            if (_clients.TryGetValue(clientId, out var client) && _sslStreams.TryGetValue(clientId, out var sslStream) && client.Connected)
             {
-                var stream = client.GetStream();
-                await stream.WriteAsync(lengthPrefix, 0, lengthPrefix.Length);
-                await stream.WriteAsync(data, 0, data.Length);
+                await sslStream.WriteAsync(lengthPrefix, 0, lengthPrefix.Length);
+                await sslStream.WriteAsync(data, 0, data.Length);
             }
         }
 
@@ -309,14 +322,12 @@ namespace MonopolyServer
 
             foreach (var kvp in _clients)
             {
-                var client = kvp.Value;
-                if (client.Connected)
+                if (_sslStreams.TryGetValue(kvp.Key, out var sslStream))
                 {
                     try
                     {
-                        var stream = client.GetStream();
-                        await stream.WriteAsync(lengthPrefix, 0, lengthPrefix.Length);
-                        await stream.WriteAsync(data, 0, data.Length);
+                        await sslStream.WriteAsync(lengthPrefix, 0, lengthPrefix.Length);
+                        await sslStream.WriteAsync(data, 0, data.Length);
                     }
                     catch (Exception ex)
                     {
@@ -341,6 +352,7 @@ namespace MonopolyServer
         {
             Console.WriteLine("Stopping server...");
             _listener.Stop();
+            foreach (var sslStreams in _sslStreams.Values) sslStreams.Close();
             foreach (var client in _clients.Values) client.Close();
             Console.WriteLine("Server stopped.");
         }
