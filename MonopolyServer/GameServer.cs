@@ -14,6 +14,9 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace MonopolyServer
 {
+    /// <summary>
+    /// Represents the game server for the Monopoly game.
+    /// </summary>
     public class GameServer
     {
         private readonly TcpListener _listener;
@@ -28,15 +31,24 @@ namespace MonopolyServer
         private CardManager _cardManager = new CardManager();
         private X509Certificate2 _serverCertificate;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GameServer"/> class.
+        /// </summary>
+        /// <param name="port">The port number to listen on.</param>
         public GameServer(int port)
         {
             _listener = new TcpListener(IPAddress.Any, port);
             string basePath = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\.."));
             string certPath = Path.Combine(basePath, _certPath);
-            
+
             _serverCertificate = new X509Certificate2(certPath, _password);
         }
 
+        /// <summary>
+        /// Processes a message received from a client.
+        /// </summary>
+        /// <param name="clientId">The ID of the client that sent the message.</param>
+        /// <param name="messageJson">The message in JSON format.</param>
         private async void ProcessMessage(string clientId, string messageJson)
         {
             var msg = JsonSerializer.Deserialize<GameMessage>(messageJson);
@@ -68,6 +80,10 @@ namespace MonopolyServer
             }
         }
 
+        /// <summary>
+        /// Handles the start game request from a client.
+        /// </summary>
+        /// <param name="clientId">The ID of the client that requested to start the game.</param>
         private void HandleStartGame(string clientId)
         {
             if (_isGameStarted)
@@ -91,6 +107,10 @@ namespace MonopolyServer
             }
         }
 
+        /// <summary>
+        /// Handles the roll dice request from a client.
+        /// </summary>
+        /// <param name="clientId">The ID of the client that requested to roll the dice.</param>
         private async Task HandleRollDice(string clientId)
         {
             if (!_isGameStarted) return;
@@ -150,6 +170,11 @@ namespace MonopolyServer
             await BroadcastGameState();
         }
 
+        /// <summary>
+        /// Handles the buy property request from a client.
+        /// </summary>
+        /// <param name="clientId">The ID of the client that requested to buy a property.</param>
+        /// <param name="data">The data containing the property information.</param>
         private async void HandleBuyProperty(string clientId, JsonElement data)
         {
             string propertyName = data.GetProperty("PropertyName").GetString();
@@ -174,6 +199,11 @@ namespace MonopolyServer
             _ = BroadcastGameState();
         }
 
+        /// <summary>
+        /// Handles the pay rent request from a client.
+        /// </summary>
+        /// <param name="clientId">The ID of the client that requested to pay rent.</param>
+        /// <param name="data">The data containing the rent information.</param>
         private void HandlePayRent(string clientId, JsonElement data)
         {
             string propertyName = data.GetProperty("PropertyName").GetString();
@@ -195,6 +225,10 @@ namespace MonopolyServer
             _ = BroadcastGameState();
         }
 
+        /// <summary>
+        /// Handles the end game request from a client.
+        /// </summary>
+        /// <param name="clientId">The ID of the client that requested to end the game.</param>
         private void HandleEndGame(string clientId)
         {
             if (!_isGameStarted) return;
@@ -204,6 +238,9 @@ namespace MonopolyServer
             BroadcastEndGame(winner);
         }
 
+        /// <summary>
+        /// Starts the game server asynchronously.
+        /// </summary>
         public async Task StartAsync()
         {
             _listener.Start();
@@ -216,6 +253,11 @@ namespace MonopolyServer
             }
         }
 
+        /// <summary>
+        /// Handles the join game request from a client.
+        /// </summary>
+        /// <param name="clientId">The ID of the client that requested to join the game.</param>
+        /// <param name="data">The data containing the player information.</param>
         private async Task HandleJoinGame(string clientId, JsonElement data)
         {
             string playerName = data.GetProperty("Name").GetString();
@@ -232,6 +274,10 @@ namespace MonopolyServer
             await BroadcastGameState();
         }
 
+        /// <summary>
+        /// Handles a client connection asynchronously.
+        /// </summary>
+        /// <param name="client">The client to handle.</param>
         private async Task HandleClientAsync(TcpClient client)
         {
             string clientId = Guid.NewGuid().ToString();
@@ -279,6 +325,11 @@ namespace MonopolyServer
 
         private readonly ConcurrentDictionary<string, SslStream> _sslStreams = new();
 
+        /// <summary>
+        /// Sends a message to a specific client asynchronously.
+        /// </summary>
+        /// <param name="clientId">The ID of the client to send the message to.</param>
+        /// <param name="message">The message to send.</param>
         private async Task SendMessageAsync(string clientId, GameMessage message)
         {
             string json = JsonSerializer.Serialize(message);
@@ -292,6 +343,9 @@ namespace MonopolyServer
             }
         }
 
+        /// <summary>
+        /// Broadcasts the current game state to all clients asynchronously.
+        /// </summary>
         private async Task BroadcastGameState()
         {
             var gameStateMsg = new GameMessage
@@ -303,6 +357,10 @@ namespace MonopolyServer
             Console.WriteLine($"Sent updated game state. Current turn: {_gameState.Players[_gameState.CurrentPlayerIndex].Name}");
         }
 
+        /// <summary>
+        /// Broadcasts the end game message to all clients asynchronously.
+        /// </summary>
+        /// <param name="winner">The player who won the game.</param>
         private async void BroadcastEndGame(Player winner)
         {
             var endGameMessage = new GameMessage
@@ -314,6 +372,10 @@ namespace MonopolyServer
             Console.WriteLine($"Game ended! Winner is {winner.Name}");
         }
 
+        /// <summary>
+        /// Broadcasts a message to all clients asynchronously.
+        /// </summary>
+        /// <param name="message">The message to broadcast.</param>
         private async Task BroadcastMessageAsync(GameMessage message)
         {
             string json = JsonSerializer.Serialize(message);
@@ -337,6 +399,10 @@ namespace MonopolyServer
             }
         }
 
+        /// <summary>
+        /// Broadcasts a log message to all clients asynchronously.
+        /// </summary>
+        /// <param name="text">The log message text.</param>
         private async Task BroadcastLogMessageAsync(string text)
         {
             var logMessage = new GameMessage
@@ -348,6 +414,9 @@ namespace MonopolyServer
             await BroadcastMessageAsync(logMessage);
         }
 
+        /// <summary>
+        /// Stops the game server.
+        /// </summary>
         public void Stop()
         {
             Console.WriteLine("Stopping server...");
