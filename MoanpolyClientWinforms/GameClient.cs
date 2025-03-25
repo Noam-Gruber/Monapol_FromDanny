@@ -16,8 +16,8 @@ namespace MonopolyClient
     public class GameClient
     {
         private TcpClient _client;
-        private NetworkStream _stream;
         private string _myPlayerId;
+        private NetworkStream _stream;
         private HashSet<string> _buyFormShownForProperties = new();
 
         public string MyPlayerId => _myPlayerId;
@@ -26,8 +26,8 @@ namespace MonopolyClient
 
         public event Action<string> MessageReceived;
         public event Action<bool> MyTurnUpdated;
-        public event Action PlayersUpdated;
         public event Action<string> GameEnded;
+        public event Action PlayersUpdated;
 
         private async void StartListening()
         {

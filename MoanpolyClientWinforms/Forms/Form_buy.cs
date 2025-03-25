@@ -1,9 +1,9 @@
 ﻿using System;
+using MonopolyServer;
 using MonopolyClient;
 using MonopolyCommon;
 using System.Text.Json;
 using System.Windows.Forms;
-using MonopolyServer;
 
 namespace MonapolClientUI.Forms
 {

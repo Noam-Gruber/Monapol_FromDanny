@@ -7,7 +7,7 @@ namespace MonopolyServer
     {
         static async Task Main(string[] args)
         {
-            int port = 5000;
+            const int port = 5000;
             GameServer server = new GameServer(port);
 
             Console.CancelKeyPress += (sender, eventArgs) =>
