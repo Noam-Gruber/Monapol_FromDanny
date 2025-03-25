@@ -1,16 +1,16 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Text;
 using System.Linq;
 using MonopolyCommon;
 using System.Text.Json;
 using System.Net.Sockets;
+using System.Net.Security;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Security.Cryptography.X509Certificates;
-using System.Net.Security;
-using System.IO;
 
 namespace MonopolyServer
 {
