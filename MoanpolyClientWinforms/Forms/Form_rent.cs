@@ -27,18 +27,9 @@ namespace MonapolClientUI.Forms
             textBox_ownedBy.Text = _ownerName;
         }
 
-        private void btnOK_Click(object sender, EventArgs e)
+        private async void btnOK_Click(object sender, EventArgs e)
         {
-            //await _client.SendMessageAsync(new GameMessage
-            //{
-            //    Type = "PayRent",
-            //    Data = JsonSerializer.SerializeToElement(new
-            //    {
-            //        PropertyName = _space.Name,
-            //        RentPrice = _space.RentPrice
-            //    })
-            //});
-            _client.SendMessageAsync(new GameMessage
+            await _client.SendMessageAsync(new GameMessage
             {
                 Type = "PayRent",
                 Data = JsonSerializer.SerializeToElement(new

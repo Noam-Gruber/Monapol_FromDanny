@@ -1,22 +1,32 @@
 ﻿using System;
-using System.Linq;
 using System.Drawing;
 using MonopolyClient;
+using MonopolyCommon;
 using System.Windows.Forms;
 
 namespace MoanpolyClientWinforms
 {
+    /// <summary>
+    /// Represents the main form for the Monopoly game client.
+    /// </summary>
     public partial class MonopolyForm : Form
     {
         private GameClient _client;
-        private const int _serverPort = 5000;
-        private const string _serverAddress = "127.0.0.1";
+        private readonly int _serverPort = Params.GetPort();
+        private readonly string _serverAddress = Params.GetServerAddress();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MonopolyForm"/> class.
+        /// </summary>
         public MonopolyForm()
         {
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Handles the Click event of the btnConnect control.
+        /// Connects to the game server.
+        /// </summary>
         private async void btnConnect_Click(object sender, EventArgs e)
         {
             _client = new GameClient();
@@ -24,29 +34,21 @@ namespace MoanpolyClientWinforms
 
             _client.MessageReceived += (message) =>
             {
-                Invoke(new Action(() =>
-                {
-                    WriteToLogger(message);
-                }));
+                Invoke(new Action(() => WriteToLogger(message)));
             };
 
             _client.MyTurnUpdated += (isMyTurn) =>
             {
                 Invoke(new Action(() =>
                 {
-                    string playerName = txtPlayerName.Text;
                     btnRollDice.Enabled = isMyTurn && !btnStartGame.Enabled;
                     btnEndGame.Enabled = !btnStartGame.Enabled;
-                    WriteToLogger(isMyTurn ? $"It's your turn {playerName}!" : "Waiting for other players...");
                 }));
             };
 
             _client.PlayersUpdated += () =>
             {
-                Invoke(new Action(() =>
-                {
-                    UpdatePlayerPositionsDisplay();
-                }));
+                Invoke(new Action(UpdatePlayerPositionsDisplay));
             };
 
             _client.GameEnded += (endGameMessage) =>
@@ -64,31 +66,34 @@ namespace MoanpolyClientWinforms
             WriteToLogger("Connected to server.");
         }
 
+        /// <summary>
+        /// Handles the Click event of the btnJoinGame control.
+        /// Joins a game with the specified player name and game ID.
+        /// </summary>
         private async void btnJoinGame_Click(object sender, EventArgs e)
         {
             string playerName = txtPlayerName.Text;
-            if (!string.IsNullOrWhiteSpace(playerName))
+            string gameId = txtGameId.Text;
+            if (!string.IsNullOrWhiteSpace(playerName) && !string.IsNullOrWhiteSpace(gameId))
             {
-                await _client.JoinGameAsync(playerName);
+                _client.SetGameId(gameId);
+                await _client.JoinGameAsync(gameId, playerName);
                 btnJoinGame.Enabled = false;
                 txtPlayerName.Enabled = false;
+                txtGameId.Enabled = false;
                 btnStartGame.Enabled = true;
-                UpdatePlayerPositionsDisplay();
-                WriteToLogger($"Joined the game as {playerName}.");
+                WriteToLogger($"Joined the game '{gameId}' as {playerName}.");
             }
             else
             {
-                WriteToLogger("Please enter a player name.");
+                WriteToLogger("Please enter both a player name and game ID.");
             }
         }
 
-        private async void btnRollDice_Click(object sender, EventArgs e)
-        {
-            string playerName = txtPlayerName.Text;
-            WriteToLogger($"{playerName}- Roll Dice");
-            await _client.RollDiceAsync();  // שלח בקשה לשרת לביצוע גלגול קוביות
-        }
-
+        /// <summary>
+        /// Handles the Click event of the btnStartGame control.
+        /// Starts the game.
+        /// </summary>
         private async void btnStartGame_Click(object sender, EventArgs e)
         {
             await _client.StartGameAsync();
@@ -98,17 +103,37 @@ namespace MoanpolyClientWinforms
             WriteToLogger("The game is starting...");
         }
 
+        /// <summary>
+        /// Handles the Click event of the btnRollDice control.
+        /// Rolls the dice.
+        /// </summary>
+        private async void btnRollDice_Click(object sender, EventArgs e)
+        {
+            await _client.RollDiceAsync();
+        }
+
+        /// <summary>
+        /// Handles the Click event of the btnEndGame control.
+        /// Ends the game.
+        /// </summary>
         private async void btnEndGame_Click(object sender, EventArgs e)
         {
             await _client.EndGame();
             WriteToLogger("You ended the game.");
         }
 
+        /// <summary>
+        /// Handles the FormClosing event of the MonopolyForm control.
+        /// Disconnects the client when the form is closing.
+        /// </summary>
         private void MonopolyForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             _client?.Disconnect();
         }
 
+        /// <summary>
+        /// Updates the display of player positions, properties, and money.
+        /// </summary>
         private void UpdatePlayerPositionsDisplay()
         {
             if (_client != null && _client.Players != null && _client.BoardSpaces != null)
@@ -119,33 +144,20 @@ namespace MoanpolyClientWinforms
 
                 foreach (var player in _client.Players)
                 {
-                    string playerName = player.Name;
-                    string position = _client.GetPlayerPositionDisplay(player.Id);
-
-                    // הדגשת שם השחקן במודגש
                     rtbPlayerPositions.SelectionFont = new Font(rtbPlayerPositions.Font, FontStyle.Bold);
-                    rtbPlayerPositions.AppendText($"{playerName}: ");
-
+                    rtbPlayerPositions.AppendText($"{player.Name}: ");
                     rtbPlayerPositions.SelectionFont = new Font(rtbPlayerPositions.Font, FontStyle.Regular);
-                    rtbPlayerPositions.AppendText($"{position}\n");
+                    rtbPlayerPositions.AppendText($"{_client.GetPlayerPositionDisplay(player.Id)}\n");
 
-                    var propertiesOwned = player.OwnedProperties;
-                    var MoneyOwned = player.Money;
-                    string propertyList = propertiesOwned.Any() ? string.Join(", ", propertiesOwned) : "No properties";
-
-                    // הדגשת שם השחקן גם ברשימת הנכסים
                     rtbPlayerProperties.SelectionFont = new Font(rtbPlayerProperties.Font, FontStyle.Bold);
-                    rtbPlayerProperties.AppendText($"{playerName}: ");
-
+                    rtbPlayerProperties.AppendText($"{player.Name}: ");
                     rtbPlayerProperties.SelectionFont = new Font(rtbPlayerProperties.Font, FontStyle.Regular);
-                    rtbPlayerProperties.AppendText($"{propertyList}\n");
+                    rtbPlayerProperties.AppendText($"{string.Join(", ", player.OwnedProperties)}\n");
 
-                    // הדגשת שם השחקן גם ברשימת הכספים
-                    rtbPlayerMoney.SelectionFont = new Font(rtbPlayerProperties.Font, FontStyle.Bold);
-                    rtbPlayerMoney.AppendText($"{playerName}: ");
-
-                    rtbPlayerMoney.SelectionFont = new Font(rtbPlayerProperties.Font, FontStyle.Regular);
-                    rtbPlayerMoney.AppendText($"{MoneyOwned}\n");
+                    rtbPlayerMoney.SelectionFont = new Font(rtbPlayerMoney.Font, FontStyle.Bold);
+                    rtbPlayerMoney.AppendText($"{player.Name}: ");
+                    rtbPlayerMoney.SelectionFont = new Font(rtbPlayerMoney.Font, FontStyle.Regular);
+                    rtbPlayerMoney.AppendText($"{player.Money}\n");
                 }
             }
             else
@@ -154,6 +166,20 @@ namespace MoanpolyClientWinforms
             }
         }
 
+        /// <summary>
+        /// Plays a simple dice roll animation.
+        /// </summary>
+        /// <param name="value">The value of the dice roll.</param>
+        private void PlayDiceAnimation(int value)
+        {
+            // simple simulation - could be replaced with image or real animation later
+            MessageBox.Show($"You rolled a {value}!", "Dice Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        /// <summary>
+        /// Writes a message to the logger with a timestamp.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
         private void WriteToLogger(string message)
         {
             string timeStampedMessage = $"{DateTime.Now:HH:mm:ss} - {message}";

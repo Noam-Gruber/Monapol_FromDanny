@@ -36,6 +36,8 @@
             this.btnStartGame = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label_GameId = new System.Windows.Forms.Label();
+            this.txtGameId = new System.Windows.Forms.TextBox();
             this.richTextBoxMessages = new System.Windows.Forms.RichTextBox();
             this.btnEndGame = new System.Windows.Forms.Button();
             this.rtbPlayerPositions = new System.Windows.Forms.RichTextBox();
@@ -82,7 +84,7 @@
             // 
             this.btnJoinGame.Enabled = false;
             this.btnJoinGame.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            this.btnJoinGame.Location = new System.Drawing.Point(255, 13);
+            this.btnJoinGame.Location = new System.Drawing.Point(462, 13);
             this.btnJoinGame.Name = "btnJoinGame";
             this.btnJoinGame.Size = new System.Drawing.Size(104, 35);
             this.btnJoinGame.TabIndex = 5;
@@ -94,7 +96,7 @@
             // 
             this.btnStartGame.Enabled = false;
             this.btnStartGame.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            this.btnStartGame.Location = new System.Drawing.Point(365, 11);
+            this.btnStartGame.Location = new System.Drawing.Point(576, 11);
             this.btnStartGame.Name = "btnStartGame";
             this.btnStartGame.Size = new System.Drawing.Size(99, 37);
             this.btnStartGame.TabIndex = 6;
@@ -115,17 +117,37 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label_GameId);
+            this.groupBox1.Controls.Add(this.txtGameId);
             this.groupBox1.Controls.Add(this.btnJoinGame);
             this.groupBox1.Controls.Add(this.txtPlayerName);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.btnStartGame);
-            this.groupBox1.Location = new System.Drawing.Point(129, -2);
+            this.groupBox1.Location = new System.Drawing.Point(130, 1);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Size = new System.Drawing.Size(469, 55);
+            this.groupBox1.Size = new System.Drawing.Size(688, 55);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
+            // 
+            // label_GameId
+            // 
+            this.label_GameId.AutoSize = true;
+            this.label_GameId.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
+            this.label_GameId.Location = new System.Drawing.Point(253, 21);
+            this.label_GameId.Name = "label_GameId";
+            this.label_GameId.Size = new System.Drawing.Size(83, 20);
+            this.label_GameId.TabIndex = 25;
+            this.label_GameId.Text = "Game Id:";
+            // 
+            // txtGameId
+            // 
+            this.txtGameId.Location = new System.Drawing.Point(342, 21);
+            this.txtGameId.Name = "txtGameId";
+            this.txtGameId.Size = new System.Drawing.Size(111, 20);
+            this.txtGameId.TabIndex = 24;
+            this.txtGameId.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // richTextBoxMessages
             // 
@@ -177,7 +199,7 @@
             // btnConnect
             // 
             this.btnConnect.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
-            this.btnConnect.Location = new System.Drawing.Point(3, 5);
+            this.btnConnect.Location = new System.Drawing.Point(7, 7);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(118, 49);
             this.btnConnect.TabIndex = 4;
@@ -224,6 +246,8 @@
         private System.Windows.Forms.RichTextBox rtbPlayerProperties;
         private System.Windows.Forms.RichTextBox rtbPlayerMoney;
         private System.Windows.Forms.Button btnConnect;
+        private System.Windows.Forms.Label label_GameId;
+        private System.Windows.Forms.TextBox txtGameId;
     }
 }
 

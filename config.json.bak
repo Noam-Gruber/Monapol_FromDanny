@@ -1,0 +1,6 @@
+{
+	"certPath": "cert.pfx",
+	"password":"aviel",
+	"_serverAddress": "127.0.0.1",
+	"port": 5000
+}

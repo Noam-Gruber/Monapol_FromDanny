@@ -21,221 +21,23 @@ namespace MonopolyServer
     {
         private readonly TcpListener _listener;
         private readonly ConcurrentDictionary<string, TcpClient> _clients = new();
-        private readonly GameState _gameState = new();
-        private readonly Board _board = new Board();
-        private const string _certPath = "cert.pfx";
-        private const string _password = "aviel";
+        private readonly ConcurrentDictionary<string, SslStream> _sslStreams = new();
+        private readonly ConcurrentDictionary<string, GameSession> _games = new();
 
-        private bool _isGameStarted = false;
-        private HashSet<string> _playersReady = new HashSet<string>();
-        private CardManager _cardManager = new CardManager();
-        private X509Certificate2 _serverCertificate;
+        private readonly X509Certificate2 _serverCertificate;
+        private readonly string _certPath = Params.GetCertPath();
+        private readonly string _password = Params.GetPassword();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GameServer"/> class.
         /// </summary>
-        /// <param name="port">The port number to listen on.</param>
+        /// <param name="port">The port number on which the server listens for incoming connections.</param>
         public GameServer(int port)
         {
             _listener = new TcpListener(IPAddress.Any, port);
-            string basePath = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\..\.."));
+            string basePath = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..", "..", ".."));
             string certPath = Path.Combine(basePath, _certPath);
-
             _serverCertificate = new X509Certificate2(certPath, _password);
-        }
-
-        /// <summary>
-        /// Processes a message received from a client.
-        /// </summary>
-        /// <param name="clientId">The ID of the client that sent the message.</param>
-        /// <param name="messageJson">The message in JSON format.</param>
-        private async void ProcessMessage(string clientId, string messageJson)
-        {
-            var msg = JsonSerializer.Deserialize<GameMessage>(messageJson);
-            if (msg == null) return;
-
-            switch (msg.Type)
-            {
-                case "JoinGame":
-                    await HandleJoinGame(clientId, msg.Data);
-                    break;
-                case "StartGame":
-                    HandleStartGame(clientId);
-                    break;
-                case "RollDice":
-                    await HandleRollDice(clientId);
-                    break;
-                case "BuyProperty":
-                    HandleBuyProperty(clientId, msg.Data);
-                    break;
-                case "PayRent":
-                    HandlePayRent(clientId, msg.Data);
-                    break;
-                case "EndGame":
-                    HandleEndGame(clientId);
-                    break;
-                default:
-                    Console.WriteLine($"Unknown message type: {msg.Type}");
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Handles the start game request from a client.
-        /// </summary>
-        /// <param name="clientId">The ID of the client that requested to start the game.</param>
-        private void HandleStartGame(string clientId)
-        {
-            if (_isGameStarted)
-            {
-                Console.WriteLine("The game has already started.");
-                return;
-            }
-
-            _playersReady.Add(clientId);
-
-            if (_playersReady.Count == _gameState.Players.Count || _gameState.Players.Count == 1)
-            {
-                _isGameStarted = true;
-                _gameState.CurrentPlayerIndex = 0;
-                Console.WriteLine("Game started immediately!");
-                _ = BroadcastGameState();
-            }
-            else
-            {
-                Console.WriteLine($"{_playersReady.Count}/{_gameState.Players.Count} players are ready.");
-            }
-        }
-
-        /// <summary>
-        /// Handles the roll dice request from a client.
-        /// </summary>
-        /// <param name="clientId">The ID of the client that requested to roll the dice.</param>
-        private async Task HandleRollDice(string clientId)
-        {
-            if (!_isGameStarted) return;
-
-            var currentPlayer = _gameState.Players[_gameState.CurrentPlayerIndex];
-            if (currentPlayer.Id != clientId) return;
-
-            Random rnd = new Random();
-            int diceRoll = rnd.Next(1, 7) + rnd.Next(1, 7);
-            currentPlayer.Position = (currentPlayer.Position + diceRoll) % 40;
-            currentPlayer.CurrentProperty = _board.Spaces[currentPlayer.Position].Name;
-
-            var space = _board.Spaces[currentPlayer.Position];
-
-            _board.UpdatePlayerPosition(clientId, currentPlayer.Position);
-            await BroadcastLogMessageAsync($"{currentPlayer.Name} rolled {diceRoll} and moved to {currentPlayer.Position}- {currentPlayer.CurrentProperty}");
-
-            if (space.IsChance)
-            {
-                var card = _cardManager.DrawChanceCard();
-                card.ApplyEffect(currentPlayer, _gameState);
-                Console.WriteLine($"Chance Card: {card.Description}");
-            }
-            else if (space.IsCommunityChest)
-            {
-                var card = _cardManager.DrawCommunityChestCard();
-                card.ApplyEffect(currentPlayer, _gameState);
-                Console.WriteLine($"Community Chest Card: {card.Description}");
-            }
-            else if (space.IsOwned && space.OwnedByPlayerId != clientId)
-            {
-                var owner = _gameState.Players.First(p => p.Id == space.OwnedByPlayerId);
-                var rentMessage = new GameMessage
-                {
-                    Type = "ShowRentForm",
-                    Data = JsonSerializer.SerializeToElement(new { Property = space, OwnerName = owner.Name })
-                };
-                Console.WriteLine("Sending ShowRentForm to " + clientId);
-                await SendMessageAsync(clientId, rentMessage);
-            }
-            else if (!space.IsOwned && currentPlayer.Money >= space.PurchasePrice)
-            {
-                var buyMessage = new GameMessage
-                {
-                    Type = "ShowBuyForm",
-                    Data = JsonSerializer.SerializeToElement(space)
-                };
-                Console.WriteLine("Sending ShowBuyForm to " + clientId);
-                await SendMessageAsync(clientId, buyMessage);
-                return; // חשוב: לא להתקדם לתור הבא עד שהשחקן יבחר
-            }
-
-            // תור עובר רק אם אין צורך בהצגת טופס
-            _gameState.CurrentPlayerIndex = (_gameState.CurrentPlayerIndex + 1) % _gameState.Players.Count;
-            Console.WriteLine($"Next turn: {_gameState.Players[_gameState.CurrentPlayerIndex].Name}");
-
-            await BroadcastGameState();
-        }
-
-        /// <summary>
-        /// Handles the buy property request from a client.
-        /// </summary>
-        /// <param name="clientId">The ID of the client that requested to buy a property.</param>
-        /// <param name="data">The data containing the property information.</param>
-        private async void HandleBuyProperty(string clientId, JsonElement data)
-        {
-            string propertyName = data.GetProperty("PropertyName").GetString();
-            var space = _board.Spaces.FirstOrDefault(s => s.Name == propertyName);
-            var player = _gameState.Players.First(p => p.Id == clientId);
-
-            if (space != null && !space.IsOwned && player.Money >= space.PurchasePrice)
-            {
-                player.Money -= space.PurchasePrice;
-                space.OwnedByPlayerId = clientId;
-                if (!player.OwnedProperties.Contains(space.Name))
-                    player.OwnedProperties.Add(space.Name);
-
-                await BroadcastLogMessageAsync($"{player.Name} bought {space.Name} for ${space.PurchasePrice}");
-            }
-            else
-            {
-                Console.WriteLine($"{player.Name} can't buy {propertyName}");
-            }
-
-            _gameState.CurrentPlayerIndex = (_gameState.CurrentPlayerIndex + 1) % _gameState.Players.Count;
-            _ = BroadcastGameState();
-        }
-
-        /// <summary>
-        /// Handles the pay rent request from a client.
-        /// </summary>
-        /// <param name="clientId">The ID of the client that requested to pay rent.</param>
-        /// <param name="data">The data containing the rent information.</param>
-        private void HandlePayRent(string clientId, JsonElement data)
-        {
-            string propertyName = data.GetProperty("PropertyName").GetString();
-            int rentPrice = data.GetProperty("RentPrice").GetInt32();
-
-            var player = _gameState.Players.First(p => p.Id == clientId);
-            var space = _board.Spaces.First(s => s.Name == propertyName);
-
-            if (space != null && space.IsOwned && space.OwnedByPlayerId != clientId)
-            {
-                player.Money -= rentPrice;
-                var owner = _gameState.Players.First(p => p.Id == space.OwnedByPlayerId);
-                owner.Money += rentPrice;
-
-                Console.WriteLine($"{player.Name} paid rent ${rentPrice} to {owner.Name} for {space.Name}");
-            }
-
-            _gameState.CurrentPlayerIndex = (_gameState.CurrentPlayerIndex + 1) % _gameState.Players.Count;
-            _ = BroadcastGameState();
-        }
-
-        /// <summary>
-        /// Handles the end game request from a client.
-        /// </summary>
-        /// <param name="clientId">The ID of the client that requested to end the game.</param>
-        private void HandleEndGame(string clientId)
-        {
-            if (!_isGameStarted) return;
-
-            _isGameStarted = false;
-            var winner = _gameState.Players.OrderByDescending(p => p.Money).FirstOrDefault();
-            BroadcastEndGame(winner);
         }
 
         /// <summary>
@@ -254,42 +56,21 @@ namespace MonopolyServer
         }
 
         /// <summary>
-        /// Handles the join game request from a client.
+        /// Handles an incoming client connection asynchronously.
         /// </summary>
-        /// <param name="clientId">The ID of the client that requested to join the game.</param>
-        /// <param name="data">The data containing the player information.</param>
-        private async Task HandleJoinGame(string clientId, JsonElement data)
-        {
-            string playerName = data.GetProperty("Name").GetString();
-            var player = new Player { Id = clientId, Name = playerName, Position = 0, CurrentProperty = _board.Spaces[0].Name };
-            _gameState.Players.Add(player);
-
-            var joinSuccessMsg = new GameMessage
-            {
-                Type = "JoinGameSuccess",
-                Data = JsonSerializer.SerializeToElement(player)
-            };
-            Console.WriteLine("Sending JoinGameSuccess to " + clientId);
-            await SendMessageAsync(clientId, joinSuccessMsg);
-            await BroadcastGameState();
-        }
-
-        /// <summary>
-        /// Handles a client connection asynchronously.
-        /// </summary>
-        /// <param name="client">The client to handle.</param>
+        /// <param name="client">The TCP client to handle.</param>
         private async Task HandleClientAsync(TcpClient client)
         {
             string clientId = Guid.NewGuid().ToString();
-            _clients.TryAdd(clientId, client);
-            Console.WriteLine($"Client connected: {clientId}");
+            _clients[clientId] = client;
 
             var stream = client.GetStream();
             var sslStream = new SslStream(stream, false);
+
             try
             {
-                await sslStream.AuthenticateAsServerAsync(_serverCertificate, clientCertificateRequired: false, checkCertificateRevocation: false);
-                _sslStreams.TryAdd(clientId, sslStream);
+                await sslStream.AuthenticateAsServerAsync(_serverCertificate, false, false);
+                _sslStreams[clientId] = sslStream;
 
                 while (true)
                 {
@@ -298,8 +79,6 @@ namespace MonopolyServer
                     if (readLength == 0) break;
 
                     int messageLength = BitConverter.ToInt32(lengthBytes, 0);
-                    if (messageLength <= 0) continue;
-
                     byte[] messageBuffer = new byte[messageLength];
                     int totalRead = 0;
                     while (totalRead < messageLength)
@@ -315,103 +94,289 @@ namespace MonopolyServer
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error with client {clientId}: {ex.Message}");
+                Console.WriteLine($"Client error: {ex.Message}");
             }
 
             _clients.TryRemove(clientId, out _);
-            _playersReady.Remove(clientId);
+            _sslStreams.TryRemove(clientId, out _);
             Console.WriteLine($"Client disconnected: {clientId}");
         }
 
-        private readonly ConcurrentDictionary<string, SslStream> _sslStreams = new();
-
         /// <summary>
-        /// Sends a message to a specific client asynchronously.
+        /// Processes a message received from a client.
         /// </summary>
-        /// <param name="clientId">The ID of the client to send the message to.</param>
-        /// <param name="message">The message to send.</param>
-        private async Task SendMessageAsync(string clientId, GameMessage message)
+        /// <param name="clientId">The ID of the client that sent the message.</param>
+        /// <param name="messageJson">The JSON string representing the message.</param>
+        private void ProcessMessage(string clientId, string messageJson)
         {
-            string json = JsonSerializer.Serialize(message);
-            byte[] data = Encoding.UTF8.GetBytes(json);
-            byte[] lengthPrefix = BitConverter.GetBytes(data.Length);
-
-            if (_clients.TryGetValue(clientId, out var client) && _sslStreams.TryGetValue(clientId, out var sslStream) && client.Connected)
+            GameMessage msg;
+            try
             {
-                await sslStream.WriteAsync(lengthPrefix, 0, lengthPrefix.Length);
-                await sslStream.WriteAsync(data, 0, data.Length);
+                msg = JsonSerializer.Deserialize<GameMessage>(messageJson);
+                if (msg == null) return;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to deserialize message: {ex.Message}");
+                return;
+            }
+
+            var session = _games.GetOrAdd(msg.GameId, _ => new GameSession());
+
+            switch (msg.Type)
+            {
+                case "JoinGame":
+                    HandleJoinGame(session, clientId, msg.Data);
+                    break;
+                case "StartGame":
+                    HandleStartGame(session, clientId);
+                    break;
+                case "RollDice":
+                    HandleRollDice(session, clientId);
+                    break;
+                case "BuyProperty":
+                    HandleBuyProperty(session, clientId, msg.Data);
+                    break;
+                case "PayRent":
+                    HandlePayRent(session, clientId, msg.Data);
+                    break;
+                case "EndGame":
+                    HandleEndGame(session);
+                    break;
             }
         }
 
         /// <summary>
-        /// Broadcasts the current game state to all clients asynchronously.
+        /// Handles a request to join a game.
         /// </summary>
-        private async Task BroadcastGameState()
+        /// <param name="session">The game session.</param>
+        /// <param name="clientId">The ID of the client requesting to join.</param>
+        /// <param name="data">The data associated with the join request.</param>
+        private void HandleJoinGame(GameSession session, string clientId, JsonElement data)
         {
-            var gameStateMsg = new GameMessage
+            string playerName = data.GetProperty("Name").GetString();
+            var player = new Player { Id = clientId, Name = playerName, Position = 0, CurrentProperty = session.Board.Spaces[0].Name };
+            session.GameState.Players.Add(player);
+
+            if (string.IsNullOrEmpty(session.GameState.GameId))
             {
-                Type = "GameStateUpdate",
-                Data = JsonSerializer.SerializeToElement(_gameState)
-            };
-            await BroadcastMessageAsync(gameStateMsg);
-            Console.WriteLine($"Sent updated game state. Current turn: {_gameState.Players[_gameState.CurrentPlayerIndex].Name}");
+                session.GameState.GameId = Guid.NewGuid().ToString();
+                _games[session.GameState.GameId] = session;
+            }
+
+            SendToClient(clientId, new GameMessage
+            {
+                Type = "JoinGameSuccess",
+                GameId = session.GameState.GameId,
+                Data = JsonSerializer.SerializeToElement(player)
+            });
+
+            BroadcastGameState(session);
         }
 
         /// <summary>
-        /// Broadcasts the end game message to all clients asynchronously.
+        /// Handles a request to start a game.
         /// </summary>
-        /// <param name="winner">The player who won the game.</param>
-        private async void BroadcastEndGame(Player winner)
+        /// <param name="session">The game session.</param>
+        /// <param name="clientId">The ID of the client requesting to start the game.</param>
+        private void HandleStartGame(GameSession session, string clientId)
         {
-            var endGameMessage = new GameMessage
+            session.PlayersReady.Add(clientId);
+            if (session.PlayersReady.Count == session.GameState.Players.Count)
+            {
+                session.IsGameStarted = true;
+                session.GameState.CurrentPlayerIndex = 0;
+                BroadcastGameState(session);
+            }
+        }
+
+        /// <summary>
+        /// Handles a request to roll the dice.
+        /// </summary>
+        /// <param name="session">The game session.</param>
+        /// <param name="clientId">The ID of the client requesting to roll the dice.</param>
+        private void HandleRollDice(GameSession session, string clientId)
+        {
+            if (!session.IsGameStarted) return;
+
+            var currentPlayer = session.GameState.Players[session.GameState.CurrentPlayerIndex];
+            if (currentPlayer.Id != clientId) return;
+
+            Random rnd = new Random();
+            int diceRoll = rnd.Next(1, 7) + rnd.Next(1, 7);
+
+            SendToClient(clientId, new GameMessage
+            {
+                Type = "DiceRolled",
+                Data = JsonSerializer.SerializeToElement(new { Value = diceRoll })
+            });
+
+            currentPlayer.Position = (currentPlayer.Position + diceRoll) % 40;
+            currentPlayer.CurrentProperty = session.Board.Spaces[currentPlayer.Position].Name;
+            session.Board.UpdatePlayerPosition(clientId, currentPlayer.Position);
+
+            BroadcastLog(session, $"{currentPlayer.Name} rolled {diceRoll} and moved to {currentPlayer.CurrentProperty}");
+
+            var space = session.Board.Spaces[currentPlayer.Position];
+            if (space.IsChance)
+            {
+                var card = session.CardManager.DrawChanceCard();
+                card.ApplyEffect(currentPlayer, session.GameState);
+            }
+            else if (space.IsCommunityChest)
+            {
+                var card = session.CardManager.DrawCommunityChestCard();
+                card.ApplyEffect(currentPlayer, session.GameState);
+            }
+            else if (space.IsOwned && space.OwnedByPlayerId != clientId)
+            {
+                var owner = session.GameState.Players.First(p => p.Id == space.OwnedByPlayerId);
+                SendToClient(clientId, new GameMessage
+                {
+                    Type = "ShowRentForm",
+                    Data = JsonSerializer.SerializeToElement(new { Property = space, OwnerName = owner.Name })
+                });
+            }
+            else if (!space.IsOwned && currentPlayer.Money >= space.PurchasePrice)
+            {
+                SendToClient(clientId, new GameMessage
+                {
+                    Type = "ShowBuyForm",
+                    Data = JsonSerializer.SerializeToElement(space)
+                });
+                return;
+            }
+
+            session.GameState.CurrentPlayerIndex = (session.GameState.CurrentPlayerIndex + 1) % session.GameState.Players.Count;
+            BroadcastGameState(session);
+        }
+
+        /// <summary>
+        /// Handles a request to buy a property.
+        /// </summary>
+        /// <param name="session">The game session.</param>
+        /// <param name="clientId">The ID of the client requesting to buy the property.</param>
+        /// <param name="data">The data associated with the buy request.</param>
+        private void HandleBuyProperty(GameSession session, string clientId, JsonElement data)
+        {
+            string propertyName = data.GetProperty("PropertyName").GetString();
+            var space = session.Board.Spaces.FirstOrDefault(s => s.Name == propertyName);
+            var player = session.GameState.Players.First(p => p.Id == clientId);
+
+            if (space != null && !space.IsOwned && player.Money >= space.PurchasePrice)
+            {
+                player.Money -= space.PurchasePrice;
+                space.OwnedByPlayerId = clientId;
+                player.OwnedProperties.Add(space.Name);
+                BroadcastLog(session, $"{player.Name} bought {space.Name} for ${space.PurchasePrice}");
+            }
+
+            session.GameState.CurrentPlayerIndex = (session.GameState.CurrentPlayerIndex + 1) % session.GameState.Players.Count;
+            BroadcastGameState(session);
+        }
+
+        /// <summary>
+        /// Handles a request to pay rent.
+        /// </summary>
+        /// <param name="session">The game session.</param>
+        /// <param name="clientId">The ID of the client requesting to pay rent.</param>
+        /// <param name="data">The data associated with the rent payment request.</param>
+        private void HandlePayRent(GameSession session, string clientId, JsonElement data)
+        {
+            string propertyName = data.GetProperty("PropertyName").GetString();
+            int rentPrice = data.GetProperty("RentPrice").GetInt32();
+
+            var player = session.GameState.Players.First(p => p.Id == clientId);
+            var space = session.Board.Spaces.First(s => s.Name == propertyName);
+            var owner = session.GameState.Players.First(p => p.Id == space.OwnedByPlayerId);
+
+            player.Money -= rentPrice;
+            owner.Money += rentPrice;
+
+            BroadcastLog(session, $"{player.Name} paid ${rentPrice} to {owner.Name} for {space.Name}");
+
+            session.GameState.CurrentPlayerIndex = (session.GameState.CurrentPlayerIndex + 1) % session.GameState.Players.Count;
+            BroadcastGameState(session);
+        }
+
+        /// <summary>
+        /// Handles a request to end the game.
+        /// </summary>
+        /// <param name="session">The game session.</param>
+        private void HandleEndGame(GameSession session)
+        {
+            session.IsGameStarted = false;
+            var winner = session.GameState.Players.OrderByDescending(p => p.Money).First();
+            BroadcastMessage(session, new GameMessage
             {
                 Type = "GameEnded",
                 Data = JsonSerializer.SerializeToElement(new { WinnerId = winner.Id, WinnerName = winner.Name, WinnerMoney = winner.Money })
-            };
-            await BroadcastMessageAsync(endGameMessage);
-            Console.WriteLine($"Game ended! Winner is {winner.Name}");
+            });
         }
 
         /// <summary>
-        /// Broadcasts a message to all clients asynchronously.
+        /// Sends a message to a specific client.
         /// </summary>
+        /// <param name="clientId">The ID of the client to send the message to.</param>
+        /// <param name="message">The message to send.</param>
+        private void SendToClient(string clientId, GameMessage message)
+        {
+            if (_sslStreams.TryGetValue(clientId, out var sslStream))
+            {
+                string json = JsonSerializer.Serialize(message);
+                byte[] data = Encoding.UTF8.GetBytes(json);
+                byte[] lengthPrefix = BitConverter.GetBytes(data.Length);
+                sslStream.Write(lengthPrefix, 0, 4);
+                sslStream.Write(data, 0, data.Length);
+            }
+        }
+
+        /// <summary>
+        /// Broadcasts the current game state to all clients in the session.
+        /// </summary>
+        /// <param name="session">The game session.</param>
+        private void BroadcastGameState(GameSession session)
+        {
+            BroadcastMessage(session, new GameMessage
+            {
+                Type = "GameStateUpdate",
+                Data = JsonSerializer.SerializeToElement(session.GameState)
+            });
+        }
+
+        /// <summary>
+        /// Broadcasts a log message to all clients in the session.
+        /// </summary>
+        /// <param name="session">The game session.</param>
+        /// <param name="text">The log message text.</param>
+        private void BroadcastLog(GameSession session, string text)
+        {
+            BroadcastMessage(session, new GameMessage
+            {
+                Type = "ServerLog",
+                Data = JsonSerializer.SerializeToElement(new { Text = text })
+            });
+        }
+
+        /// <summary>
+        /// Broadcasts a message to all clients in the session.
+        /// </summary>
+        /// <param name="session">The game session.</param>
         /// <param name="message">The message to broadcast.</param>
-        private async Task BroadcastMessageAsync(GameMessage message)
+        private void BroadcastMessage(GameSession session, GameMessage message)
         {
             string json = JsonSerializer.Serialize(message);
             byte[] data = Encoding.UTF8.GetBytes(json);
             byte[] lengthPrefix = BitConverter.GetBytes(data.Length);
 
-            foreach (var kvp in _clients)
+            foreach (var player in session.GameState.Players)
             {
-                if (_sslStreams.TryGetValue(kvp.Key, out var sslStream))
+                if (_sslStreams.TryGetValue(player.Id, out var sslStream))
                 {
-                    try
-                    {
-                        await sslStream.WriteAsync(lengthPrefix, 0, lengthPrefix.Length);
-                        await sslStream.WriteAsync(data, 0, data.Length);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error sending to client {kvp.Key}: {ex.Message}");
-                    }
+                    sslStream.Write(lengthPrefix, 0, 4);
+                    sslStream.Write(data, 0, data.Length);
                 }
             }
-        }
-
-        /// <summary>
-        /// Broadcasts a log message to all clients asynchronously.
-        /// </summary>
-        /// <param name="text">The log message text.</param>
-        private async Task BroadcastLogMessageAsync(string text)
-        {
-            var logMessage = new GameMessage
-            {
-                Type = "ServerLog",
-                Data = JsonSerializer.SerializeToElement(new { Text = text })
-            };
-            Console.WriteLine(text);
-            await BroadcastMessageAsync(logMessage);
         }
 
         /// <summary>
@@ -421,9 +386,21 @@ namespace MonopolyServer
         {
             Console.WriteLine("Stopping server...");
             _listener.Stop();
-            foreach (var sslStreams in _sslStreams.Values) sslStreams.Close();
+            foreach (var sslStream in _sslStreams.Values) sslStream.Close();
             foreach (var client in _clients.Values) client.Close();
             Console.WriteLine("Server stopped.");
+        }
+
+        /// <summary>
+        /// Represents a game session.
+        /// </summary>
+        private class GameSession
+        {
+            public GameState GameState = new();
+            public HashSet<string> PlayersReady = new();
+            public bool IsGameStarted = false;
+            public CardManager CardManager = new();
+            public Board Board = new();
         }
     }
 }

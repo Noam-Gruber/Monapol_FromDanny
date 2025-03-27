@@ -4,7 +4,8 @@ namespace MonopolyCommon
 {
     public class GameMessage
     {
-        public string Type { get; set; }
+        public string? GameId { get; set; }
+        public string? Type { get; set; }
         public JsonElement Data { get; set; }
     }
 }

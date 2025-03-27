@@ -21,11 +21,12 @@ namespace MonopolyClient
     {
         private TcpClient _client;
         private string _myPlayerId;
-        private HashSet<string> _buyFormShownForProperties = new();
+        private string _gameId;
         private SslStream _sslStream;
+        private HashSet<string> _buyFormShownForProperties = new();
 
         /// <summary>
-        /// Gets the player ID of the current player.
+        /// Gets the ID of the current player.
         /// </summary>
         public string MyPlayerId => _myPlayerId;
 
@@ -40,27 +41,19 @@ namespace MonopolyClient
         public List<BoardSpace> BoardSpaces { get; private set; }
 
         /// <summary>
-        /// Occurs when a message is received from the server.
+        /// Sets the game ID.
         /// </summary>
+        /// <param name="gameId">The game ID.</param>
+        public void SetGameId(string gameId) => _gameId = gameId;
+
         public event Action<string> MessageReceived;
-
-        /// <summary>
-        /// Occurs when the turn status of the current player is updated.
-        /// </summary>
         public event Action<bool> MyTurnUpdated;
-
-        /// <summary>
-        /// Occurs when the game ends.
-        /// </summary>
         public event Action<string> GameEnded;
-
-        /// <summary>
-        /// Occurs when the list of players is updated.
-        /// </summary>
         public event Action PlayersUpdated;
+        public event Action<int> DiceRolled;
 
         /// <summary>
-        /// Starts listening for messages from the server.
+        /// Starts listening for incoming messages from the server.
         /// </summary>
         private async void StartListening()
         {
@@ -85,7 +78,6 @@ namespace MonopolyClient
                     }
 
                     string json = Encoding.UTF8.GetString(data);
-                    Console.WriteLine($"DEBUG: Received message: {json}");
                     HandleMessage(json);
                 }
             }
@@ -96,9 +88,9 @@ namespace MonopolyClient
         }
 
         /// <summary>
-        /// Handles a message received from the server.
+        /// Handles an incoming message from the server.
         /// </summary>
-        /// <param name="messageJson">The JSON string of the message.</param>
+        /// <param name="messageJson">The JSON string representing the message.</param>
         private void HandleMessage(string messageJson)
         {
             var gameMessage = JsonSerializer.Deserialize<GameMessage>(messageJson);
@@ -120,10 +112,8 @@ namespace MonopolyClient
                     MyTurnUpdated?.Invoke(isMyTurn);
                     PlayersUpdated?.Invoke();
 
-                    // 🧽 Clear the set of forms that have already been shown when the turn passes
                     if (!isMyTurn)
                         _buyFormShownForProperties.Clear();
-
                     break;
 
                 case "GameEnded":
@@ -169,6 +159,11 @@ namespace MonopolyClient
                     string text = gameMessage.Data.GetProperty("Text").GetString();
                     MessageReceived?.Invoke(text);
                     break;
+
+                case "DiceRolled":
+                    int diceValue = gameMessage.Data.GetProperty("Value").GetInt32();
+                    DiceRolled?.Invoke(diceValue);
+                    break;
             }
         }
 
@@ -177,26 +172,33 @@ namespace MonopolyClient
         /// </summary>
         /// <param name="ip">The IP address of the server.</param>
         /// <param name="port">The port number of the server.</param>
-        /// <returns>A task that represents the asynchronous connect operation.</returns>
         public async Task ConnectAsync(string ip, int port)
         {
-            _client = new TcpClient();
-            await _client.ConnectAsync(ip, port);
+            try
+            {
+                _client = new TcpClient();
+                await _client.ConnectAsync(ip, port);
+                Console.WriteLine("Connected to server.");
 
-            var stream = _client.GetStream();
-            _sslStream = new SslStream(stream, false, (sender, cert, chain, errors) => true); // ❗ Accepts any certificate (for testing only)
-
-            await _sslStream.AuthenticateAsClientAsync("localhost");
-            StartListening();
+                var stream = _client.GetStream();
+                _sslStream = new SslStream(stream, false, (sender, cert, chain, errors) => true);
+                await _sslStream.AuthenticateAsClientAsync("localhost");
+                Console.WriteLine("SSL authentication completed.");
+                StartListening();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error connecting to server: {ex.Message}");
+            }
         }
 
         /// <summary>
         /// Sends a message to the server asynchronously.
         /// </summary>
         /// <param name="message">The message to send.</param>
-        /// <returns>A task that represents the asynchronous send operation.</returns>
         public async Task SendMessageAsync(GameMessage message)
         {
+            message.GameId = _gameId;
             string json = JsonSerializer.Serialize(message);
             byte[] data = Encoding.UTF8.GetBytes(json);
             byte[] prefix = BitConverter.GetBytes(data.Length);
@@ -206,40 +208,54 @@ namespace MonopolyClient
         }
 
         /// <summary>
-        /// Sends a request to join the game asynchronously.
+        /// Joins a game asynchronously.
         /// </summary>
+        /// <param name="gameId">The game ID.</param>
         /// <param name="name">The name of the player.</param>
-        /// <returns>A task that represents the asynchronous join operation.</returns>
-        public async Task JoinGameAsync(string name)
+        public async Task JoinGameAsync(string gameId, string name)
         {
-            await SendMessageAsync(new GameMessage { Type = "JoinGame", Data = JsonSerializer.SerializeToElement(new { Name = name }) });
+            await SendMessageAsync(new GameMessage
+            {
+                Type = "JoinGame",
+                GameId = gameId,
+                Data = JsonSerializer.SerializeToElement(new { Name = name })
+            });
         }
 
         /// <summary>
-        /// Sends a request to start the game asynchronously.
+        /// Starts the game asynchronously.
         /// </summary>
-        /// <returns>A task that represents the asynchronous start operation.</returns>
         public async Task StartGameAsync()
         {
-            await SendMessageAsync(new GameMessage { Type = "StartGame", Data = JsonSerializer.SerializeToElement(new { }) });
+            await SendMessageAsync(new GameMessage
+            {
+                Type = "StartGame",
+                Data = JsonSerializer.SerializeToElement(new { })
+            });
         }
 
         /// <summary>
-        /// Sends a request to roll the dice asynchronously.
+        /// Rolls the dice asynchronously.
         /// </summary>
-        /// <returns>A task that represents the asynchronous roll operation.</returns>
         public async Task RollDiceAsync()
         {
-            await SendMessageAsync(new GameMessage { Type = "RollDice", Data = JsonSerializer.SerializeToElement(new { }) });
+            await SendMessageAsync(new GameMessage
+            {
+                Type = "RollDice",
+                Data = JsonSerializer.SerializeToElement(new { })
+            });
         }
 
         /// <summary>
-        /// Sends a request to end the game asynchronously.
+        /// Ends the game asynchronously.
         /// </summary>
-        /// <returns>A task that represents the asynchronous end operation.</returns>
         public async Task EndGame()
         {
-            await SendMessageAsync(new GameMessage { Type = "EndGame", Data = JsonSerializer.SerializeToElement(new { }) });
+            await SendMessageAsync(new GameMessage
+            {
+                Type = "EndGame",
+                Data = JsonSerializer.SerializeToElement(new { })
+            });
         }
 
         /// <summary>
@@ -252,7 +268,7 @@ namespace MonopolyClient
         }
 
         /// <summary>
-        /// Gets the display string for the position of a player.
+        /// Gets the display string for a player's position.
         /// </summary>
         /// <param name="playerId">The ID of the player.</param>
         /// <returns>The display string for the player's position.</returns>
